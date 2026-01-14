@@ -134,6 +134,20 @@ $srcset = ImageBoss::from($asset)->preset(Preset::Hero)->srcsetString();
 | `srcset()` | Generate srcset array |
 | `srcsetString()` | Generate srcset string |
 
+### Example Output
+
+`url()` returns a single URL:
+
+```
+https://img.imageboss.me/your-source/width/800/format:auto/assets/image.jpg
+```
+
+`srcsetString()` returns a comma-separated srcset string:
+
+```
+https://img.imageboss.me/.../width/640/... 640w, https://img.imageboss.me/.../width/1280/... 1280w, https://img.imageboss.me/.../width/1920/... 1920w
+```
+
 ## Features
 
 - Responsive srcset generation
