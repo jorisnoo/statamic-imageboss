@@ -1,84 +1,126 @@
-# This is my package statamic-imageboss
+# Statamic ImageBoss
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/jorisnoo/statamic-imageboss.svg?style=flat-square)](https://packagist.org/packages/jorisnoo/statamic-imageboss)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/jorisnoo/statamic-imageboss/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/jorisnoo/statamic-imageboss/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/jorisnoo/statamic-imageboss/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/jorisnoo/statamic-imageboss/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/jorisnoo/statamic-imageboss.svg?style=flat-square)](https://packagist.org/packages/jorisnoo/statamic-imageboss)
+[ImageBoss](https://imageboss.me/) integration for [Statamic CMS](https://statamic.com/).
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+## Requirements
 
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/statamic-imageboss.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/statamic-imageboss)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+- PHP 8.2+
+- Laravel 11+
+- Statamic 5
 
 ## Installation
-
-You can install the package via composer:
 
 ```bash
 composer require jorisnoo/statamic-imageboss
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="statamic-imageboss-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
+Publish the configuration:
 
 ```bash
 php artisan vendor:publish --tag="statamic-imageboss-config"
 ```
 
-This is the contents of the published config file:
+## Configuration
 
-```php
-return [
-];
+Set your ImageBoss credentials in `.env`:
+
+```env
+IMAGEBOSS_SOURCE=your-source
+IMAGEBOSS_SECRET=your-secret  # optional, for URL signing
 ```
 
-Optionally, you can publish the views using
+When `IMAGEBOSS_SOURCE` is not set, the package falls back to Statamic's Glide.
 
-```bash
-php artisan vendor:publish --tag="statamic-imageboss-views"
-```
+### Config Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `source` | `null` | ImageBoss source identifier |
+| `secret` | `null` | HMAC secret for URL signing |
+| `base_url` | `https://img.imageboss.me` | ImageBoss CDN base URL |
+| `default_width` | `1000` | Default width for `url()` |
+| `width_interval` | `200` | Step size for srcset generation |
+| `presets` | see config | Named preset configurations |
+
+### Presets
+
+| Preset | Min | Max | Ratio | Interval |
+|--------|-----|-----|-------|----------|
+| default | 320 | 2560 | - | 200 |
+| thumbnail | 200 | 700 | 1:1 | 250 |
+| card | 300 | 800 | 4:5 | 200 |
+| hero | 640 | 3840 | - | 200 |
 
 ## Usage
 
+### Antlers
+
+```antlers
+// Single URL
+{{ imageboss:url src="image" width="800" }}
+{{ imageboss:url src="image" width="800" ratio="1.777" }}
+
+// Responsive srcset
+{{ imageboss:srcset src="image" preset="hero" }}
+{{ imageboss:srcset src="image" min="300" max="1200" interval="150" }}
+```
+
+Full example:
+
+```antlers
+<img
+    src="{{ imageboss:url src="hero" width="800" }}"
+    srcset="{{ imageboss:srcset src="hero" preset="default" }}"
+    sizes="100vw"
+    alt="{{ hero:alt }}"
+>
+```
+
+### PHP
+
 ```php
-$statamicImageboss = new Noo\StatamicImageboss();
-echo $statamicImageboss->echoPhrase('Hello, Noo!');
+use Noo\StatamicImageboss\Facades\ImageBoss;
+use Noo\StatamicImageboss\Preset;
+
+// Single URL
+$url = ImageBoss::from($asset)->width(800)->url();
+$url = ImageBoss::from($asset)->width(800)->ratio(16/9)->url();
+
+// Responsive srcset
+$srcset = ImageBoss::from($asset)->preset('hero')->srcsetString();
+$srcset = ImageBoss::from($asset)->preset(Preset::Card)->srcsetString();
+
+// Custom configuration
+$srcset = ImageBoss::from($asset)
+    ->min(300)
+    ->max(1200)
+    ->interval(200)
+    ->ratio(4/5)
+    ->srcsetString();
 ```
 
-## Testing
+### Builder Methods
 
-```bash
-composer test
-```
+| Method | Description |
+|--------|-------------|
+| `width(int)` | Set image width |
+| `height(int)` | Set image height |
+| `ratio(float)` | Set aspect ratio (width/height) |
+| `min(int)` | Minimum width for srcset |
+| `max(int)` | Maximum width for srcset |
+| `interval(int)` | Width step for srcset |
+| `preset(string\|Preset)` | Apply preset configuration |
+| `url()` | Generate single URL |
+| `srcset()` | Generate srcset array |
+| `srcsetString()` | Generate srcset string |
 
-## Changelog
+## Features
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [Joris Noordermeer](https://github.com/jorisnoo)
-- [All Contributors](../../contributors)
+- Responsive srcset generation
+- Focal point support (reads from asset data)
+- URL signing with HMAC-SHA256
+- Automatic Glide fallback
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+MIT
