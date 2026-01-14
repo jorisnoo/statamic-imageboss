@@ -2,12 +2,7 @@
 
 use Noo\StatamicImageboss\ImageBoss;
 use Noo\StatamicImageboss\ImageBossBuilder;
-
-enum TestPreset: string
-{
-    case Card = 'card';
-    case Thumbnail = 'thumbnail';
-}
+use Noo\StatamicImageboss\Tests\Fixtures\TestPreset;
 
 beforeEach(function () {
     config()->set('statamic-imageboss.source', 'test-source');
@@ -23,30 +18,6 @@ beforeEach(function () {
     ]);
 });
 
-function createMockAsset(bool $hasFocus = false, ?string $focusValue = null): Mockery\MockInterface
-{
-    $disk = Mockery::mock();
-    $disk->name = 'assets';
-
-    $container = Mockery::mock();
-    $container->shouldReceive('disk')->andReturn($disk);
-    $container->shouldReceive('handle')->andReturn('assets');
-
-    $data = Mockery::mock();
-    $data->shouldReceive('has')->with('focus')->andReturn($hasFocus);
-
-    if ($hasFocus && $focusValue) {
-        $data->shouldReceive('get')->with('focus')->andReturn($focusValue);
-    }
-
-    $asset = Mockery::mock(\Statamic\Assets\Asset::class);
-    $asset->shouldReceive('container')->andReturn($container);
-    $asset->shouldReceive('data')->andReturn($data);
-    $asset->shouldReceive('path')->andReturn('/test.jpg');
-
-    return $asset;
-}
-
 it('can be instantiated via the factory', function () {
     $imageBoss = new ImageBoss;
 
@@ -60,9 +31,9 @@ it('loads preset configuration', function () {
 
     $srcset = $builder->srcset();
 
-    expect($srcset)->toBeArray();
-    expect($srcset[0]['width'])->toBe(300);
-    expect(end($srcset)['width'])->toBe(800);
+    expect($srcset)->toBeArray()
+        ->and($srcset[0]['width'])->toBe(300)
+        ->and(end($srcset)['width'])->toBe(800);
 });
 
 it('generates correct widths with default interval', function () {
@@ -105,9 +76,9 @@ it('generates srcset string format', function () {
 
     $srcsetString = $builder->srcsetString();
 
-    expect($srcsetString)->toContain('300w');
-    expect($srcsetString)->toContain('500w');
-    expect($srcsetString)->toContain(', ');
+    expect($srcsetString)->toContain('300w')
+        ->and($srcsetString)->toContain('500w')
+        ->and($srcsetString)->toContain(', ');
 });
 
 it('generates imageboss url with width operation', function () {
@@ -117,10 +88,10 @@ it('generates imageboss url with width operation', function () {
 
     $url = $builder->url();
 
-    expect($url)->toContain('https://img.imageboss.me');
-    expect($url)->toContain('test-source');
-    expect($url)->toContain('width/800');
-    expect($url)->toContain('format:auto');
+    expect($url)->toContain('https://img.imageboss.me')
+        ->and($url)->toContain('test-source')
+        ->and($url)->toContain('width/800')
+        ->and($url)->toContain('format:auto');
 });
 
 it('generates imageboss url with cover operation when height is set', function () {
@@ -184,9 +155,9 @@ it('accepts backed enum for type-safe preset selection', function () {
 
     $srcset = $builder->srcset();
 
-    expect($srcset)->toBeArray();
-    expect($srcset[0]['width'])->toBe(300);
-    expect(end($srcset)['width'])->toBe(800);
+    expect($srcset)->toBeArray()
+        ->and($srcset[0]['width'])->toBe(300)
+        ->and(end($srcset)['width'])->toBe(800);
 });
 
 it('applies ratio from preset', function () {
