@@ -148,6 +148,12 @@ https://img.imageboss.me/your-source/width/800/format:auto/assets/image.jpg
 https://img.imageboss.me/.../width/640/... 640w, https://img.imageboss.me/.../width/1280/... 1280w, https://img.imageboss.me/.../width/1920/... 1920w
 ```
 
+When an asset has a focal point set, it's automatically included in the URL:
+
+```
+https://img.imageboss.me/your-source/cover:800x450/fp:0.25,0.75/format:auto/assets/image.jpg
+```
+
 ## Features
 
 - Responsive srcset generation
