@@ -70,29 +70,32 @@ class ImageBossBuilder
         return $this;
     }
 
-    public function preset(string $name): self
+    public function preset(Preset|string $preset): self
     {
-        $presets = config('statamic-imageboss.presets', []);
-        $preset = $presets[$name] ?? null;
+        if ($preset instanceof Preset) {
+            $config = $preset->config();
+        } else {
+            $config = config("statamic-imageboss.presets.{$preset}", []);
+        }
 
-        if (! $preset) {
+        if (empty($config)) {
             return $this;
         }
 
-        if (isset($preset['min'])) {
-            $this->min = $preset['min'];
+        if (isset($config['min'])) {
+            $this->min = $config['min'];
         }
 
-        if (isset($preset['max'])) {
-            $this->max = $preset['max'];
+        if (isset($config['max'])) {
+            $this->max = $config['max'];
         }
 
-        if (isset($preset['ratio'])) {
-            $this->ratio = $preset['ratio'];
+        if (isset($config['ratio'])) {
+            $this->ratio = $config['ratio'];
         }
 
-        if (isset($preset['interval'])) {
-            $this->interval = $preset['interval'];
+        if (isset($config['interval'])) {
+            $this->interval = $config['interval'];
         }
 
         return $this;

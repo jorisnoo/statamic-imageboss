@@ -2,6 +2,7 @@
 
 use Noo\StatamicImageboss\ImageBoss;
 use Noo\StatamicImageboss\ImageBossBuilder;
+use Noo\StatamicImageboss\Preset;
 
 beforeEach(function () {
     config()->set('statamic-imageboss.source', 'test-source');
@@ -169,4 +170,44 @@ it('uses default width from config when no width specified', function () {
     $url = $builder->url();
 
     expect($url)->toContain('width/500');
+});
+
+it('accepts Preset enum for type-safe preset selection', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->preset(Preset::Card);
+
+    $srcset = $builder->srcset();
+
+    expect($srcset)->toBeArray();
+    expect($srcset[0]['width'])->toBe(300);
+    expect(end($srcset)['width'])->toBe(800);
+});
+
+it('Preset enum has correct configuration for each case', function () {
+    expect(Preset::Default->config())->toBe(['min' => 320, 'max' => 2560]);
+    expect(Preset::Thumbnail->config())->toBe(['min' => 200, 'max' => 700, 'ratio' => 1, 'interval' => 250]);
+    expect(Preset::Card->config())->toBe(['min' => 300, 'max' => 800, 'ratio' => 4 / 5]);
+    expect(Preset::Hero->config())->toBe(['min' => 640, 'max' => 3840]);
+});
+
+it('applies ratio from Preset enum', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->preset(Preset::Thumbnail)->width(400);
+
+    $url = $builder->url();
+
+    expect($url)->toContain('cover/400x400');
+});
+
+it('applies interval from Preset enum', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->preset(Preset::Thumbnail);
+
+    $srcset = $builder->srcset();
+    $widths = array_column($srcset, 'width');
+
+    expect($widths)->toBe([200, 450, 700]);
 });
