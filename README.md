@@ -44,12 +44,22 @@ When `IMAGEBOSS_SOURCE` is not set, the package falls back to Statamic's Glide.
 
 ### Presets
 
-| Preset | Min | Max | Ratio | Interval |
-|--------|-----|-----|-------|----------|
-| default | 320 | 2560 | - | 200 |
-| thumbnail | 200 | 700 | 1:1 | 250 |
-| card | 300 | 800 | 4:5 | 200 |
-| hero | 640 | 3840 | - | 200 |
+Define presets in `config/statamic-imageboss.php`:
+
+```php
+'presets' => [
+    'thumbnail' => [
+        'min' => 200,      // minimum srcset width
+        'max' => 700,      // maximum srcset width
+        'ratio' => 1,      // aspect ratio (optional)
+        'interval' => 250, // width step (optional)
+    ],
+    'hero' => [
+        'min' => 640,
+        'max' => 3840,
+    ],
+],
+```
 
 ## Usage
 
@@ -80,15 +90,13 @@ Full example:
 
 ```php
 use Noo\StatamicImageboss\Facades\ImageBoss;
-use Noo\StatamicImageboss\Preset;
 
 // Single URL
 $url = ImageBoss::from($asset)->width(800)->url();
 $url = ImageBoss::from($asset)->width(800)->ratio(16/9)->url();
 
-// Responsive srcset
+// Responsive srcset with preset
 $srcset = ImageBoss::from($asset)->preset('hero')->srcsetString();
-$srcset = ImageBoss::from($asset)->preset(Preset::Card)->srcsetString();
 
 // Custom configuration
 $srcset = ImageBoss::from($asset)
@@ -97,6 +105,18 @@ $srcset = ImageBoss::from($asset)
     ->interval(200)
     ->ratio(4/5)
     ->srcsetString();
+```
+
+For type safety, create a backed enum matching your config presets:
+
+```php
+enum Preset: string
+{
+    case Hero = 'hero';
+    case Thumbnail = 'thumbnail';
+}
+
+$srcset = ImageBoss::from($asset)->preset(Preset::Hero)->srcsetString();
 ```
 
 ### Builder Methods
@@ -109,7 +129,7 @@ $srcset = ImageBoss::from($asset)
 | `min(int)` | Minimum width for srcset |
 | `max(int)` | Maximum width for srcset |
 | `interval(int)` | Width step for srcset |
-| `preset(string\|Preset)` | Apply preset configuration |
+| `preset(string)` | Apply preset configuration |
 | `url()` | Generate single URL |
 | `srcset()` | Generate srcset array |
 | `srcsetString()` | Generate srcset string |

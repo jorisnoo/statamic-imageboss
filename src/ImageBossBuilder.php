@@ -70,13 +70,10 @@ class ImageBossBuilder
         return $this;
     }
 
-    public function preset(Preset|string $preset): self
+    public function preset(\BackedEnum|string $preset): self
     {
-        if ($preset instanceof Preset) {
-            $config = $preset->config();
-        } else {
-            $config = config("statamic-imageboss.presets.{$preset}", []);
-        }
+        $presetName = $preset instanceof \BackedEnum ? $preset->value : $preset;
+        $config = config("statamic-imageboss.presets.{$presetName}", []);
 
         if (empty($config)) {
             return $this;
