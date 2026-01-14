@@ -2,24 +2,27 @@
 
 namespace Noo\StatamicImageboss;
 
+use Noo\StatamicImageboss\Tags\ImagebossTag;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Noo\StatamicImageboss\Commands\StatamicImagebossCommand;
+use Statamic\Statamic;
 
 class StatamicImagebossServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package
             ->name('statamic-imageboss')
-            ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_statamic_imageboss_table')
-            ->hasCommand(StatamicImagebossCommand::class);
+            ->hasConfigFile();
+    }
+
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(ImageBoss::class);
+    }
+
+    public function packageBooted(): void
+    {
+        Statamic::tag('imageboss', ImagebossTag::class);
     }
 }
