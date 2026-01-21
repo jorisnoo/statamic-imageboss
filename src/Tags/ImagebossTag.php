@@ -21,19 +21,14 @@ class ImagebossTag extends Tags
             return '';
         }
 
-        $builder = app(ImageBoss::class)->from($asset);
+        $width = $this->params->get('width');
+        $height = $this->params->get('height');
+        $ratio = $this->params->get('ratio');
 
-        if ($width = $this->params->get('width')) {
-            $builder->width((int) $width);
-        }
-
-        if ($height = $this->params->get('height')) {
-            $builder->height((int) $height);
-        }
-
-        if ($ratio = $this->params->get('ratio')) {
-            $builder->ratio((float) $ratio);
-        }
+        $builder = app(ImageBoss::class)->from($asset)
+            ->width($width ? (int) $width : null)
+            ->height($height ? (int) $height : null)
+            ->ratio($ratio ? (float) $ratio : null);
 
         return $builder->url();
     }
@@ -49,27 +44,23 @@ class ImagebossTag extends Tags
             return '';
         }
 
+        $preset = $this->params->get('preset');
+        $min = $this->params->get('min');
+        $max = $this->params->get('max');
+        $interval = $this->params->get('interval');
+        $ratio = $this->params->get('ratio');
+
         $builder = app(ImageBoss::class)->from($asset);
 
-        if ($preset = $this->params->get('preset')) {
+        if ($preset) {
             $builder->preset($preset);
         }
 
-        if ($min = $this->params->get('min')) {
-            $builder->min((int) $min);
-        }
-
-        if ($max = $this->params->get('max')) {
-            $builder->max((int) $max);
-        }
-
-        if ($interval = $this->params->get('interval')) {
-            $builder->interval((int) $interval);
-        }
-
-        if ($ratio = $this->params->get('ratio')) {
-            $builder->ratio((float) $ratio);
-        }
+        $builder
+            ->min($min ? (int) $min : null)
+            ->max($max ? (int) $max : null)
+            ->interval($interval ? (int) $interval : null)
+            ->ratio($ratio ? (float) $ratio : null);
 
         return $builder->srcsetString();
     }
