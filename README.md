@@ -65,8 +65,6 @@ Define presets in `config/statamic-imageboss.php`:
 ],
 ```
 
-Good for: shared presets across projects, non-PHP templates.
-
 #### Option 2: Interface-Based Presets
 
 Implement the `ImagePreset` interface on your enum for self-contained presets:
@@ -108,9 +106,30 @@ Preset::Card->ratio();    // 0.8
 Preset::Thumbnail->interval(); // 250
 ```
 
-Good for: type safety, self-documenting code, no config sync needed.
-
 ## Usage
+
+### PHP
+
+```php
+use Noo\StatamicImageboss\Facades\ImageBoss;
+
+// Single URL
+$url = ImageBoss::from($asset)->width(800)->url();
+$url = ImageBoss::from($asset)->width(800)->ratio(16/9)->url();
+
+// Responsive srcset with preset
+$srcset = ImageBoss::from($asset)->preset('hero')->srcsetString();
+// Or
+$srcset = ImageBoss::from($asset)->preset(Preset::Hero)->srcsetString();
+
+// Custom configuration
+$srcset = ImageBoss::from($asset)
+    ->min(300)
+    ->max(1200)
+    ->interval(200)
+    ->ratio(4/5)
+    ->srcsetString();
+```
 
 ### Antlers
 
@@ -135,62 +154,6 @@ Full example:
 >
 ```
 
-### PHP
-
-```php
-use Noo\StatamicImageboss\Facades\ImageBoss;
-
-// Single URL
-$url = ImageBoss::from($asset)->width(800)->url();
-$url = ImageBoss::from($asset)->width(800)->ratio(16/9)->url();
-
-// Responsive srcset with preset
-$srcset = ImageBoss::from($asset)->preset('hero')->srcsetString();
-
-// Custom configuration
-$srcset = ImageBoss::from($asset)
-    ->min(300)
-    ->max(1200)
-    ->interval(200)
-    ->ratio(4/5)
-    ->srcsetString();
-```
-
-For type safety, create a backed enum. You can use either approach:
-
-```php
-// Simple enum (requires config presets)
-enum Preset: string
-{
-    case Hero = 'hero';
-    case Thumbnail = 'thumbnail';
-}
-
-// Or interface-based (self-contained, no config needed)
-use Noo\StatamicImageboss\Concerns\HasImagePresetHelpers;
-use Noo\StatamicImageboss\Contracts\ImagePreset;
-
-enum Preset: string implements ImagePreset
-{
-    use HasImagePresetHelpers;
-
-    case Hero = 'hero';
-
-    public function config(): array
-    {
-        return match ($this) {
-            self::Hero => ['min' => 640, 'max' => 3840],
-        };
-    }
-}
-
-// Usage is the same for both
-$srcset = ImageBoss::from($asset)->preset(Preset::Hero)->srcsetString();
-
-// Interface presets also provide helper methods
-$aspectRatio = Preset::Hero->ratio();
-```
-
 ### Builder Methods
 
 | Method | Description |
@@ -203,6 +166,7 @@ $aspectRatio = Preset::Hero->ratio();
 | `interval(int)` | Width step for srcset |
 | `preset(string)` | Apply preset configuration |
 | `url()` | Generate single URL |
+| `rias()` | Generate URL with `{width}` placeholder for lazysizes RIAS |
 | `srcset()` | Generate srcset array |
 | `srcsetString()` | Generate srcset string |
 
@@ -219,6 +183,24 @@ https://img.imageboss.me/your-source/width/800/format:auto/assets/image.jpg
 ```
 https://img.imageboss.me/.../width/640/... 640w, https://img.imageboss.me/.../width/1280/... 1280w, https://img.imageboss.me/.../width/1920/... 1920w
 ```
+
+`rias()` returns a URL with `{width}` and `{height}` placeholders for [lazysizes RIAS](https://github.com/aFarkas/lazysizes/tree/gh-pages/plugins/rias):
+
+```php
+// Width only - no aspect ratio constraint
+ImageBoss::from($asset)->rias();
+// => https://img.imageboss.me/your-source/width/{width}/format:auto/assets/image.jpg
+
+// With height - maintains aspect ratio via {height} placeholder
+ImageBoss::from($asset)->height(630)->rias();
+// => https://img.imageboss.me/your-source/cover/{width}x{height}/format:auto/assets/image.jpg
+
+// With ratio - same result, height calculated by lazysizes
+ImageBoss::from($asset)->ratio(16/9)->rias();
+// => https://img.imageboss.me/your-source/cover/{width}x{height}/format:auto/assets/image.jpg
+```
+
+Lazysizes replaces `{width}` with the calculated width and `{height}` based on the `--ls-aspectratio` CSS variable.
 
 When an asset has a focal point set, it's automatically included in the URL:
 

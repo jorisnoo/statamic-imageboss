@@ -154,6 +154,42 @@ class ImageBossBuilder
             ->join(', ');
     }
 
+    public function rias(): string
+    {
+        $source = config('statamic-imageboss.source');
+
+        if (! $source) {
+            return $this->url();
+        }
+
+        $height = ($this->height || $this->ratio) ? '{height}' : null;
+
+        $operations = collect(['', $source]);
+
+        if ($height) {
+            $operations->push("cover/{width}x{$height}");
+        } else {
+            $operations->push('width/{width}');
+        }
+
+        $focalPoint = $this->getFocalPoint();
+
+        if ($focalPoint) {
+            $operations->push("fp-x:{$focalPoint['x']},fp-y:{$focalPoint['y']},format:auto");
+        } else {
+            $operations->push('format:auto');
+        }
+
+        $operations->push(
+            $this->asset->container()->disk()->name ?? $this->asset->container()->handle(),
+            ltrim($this->asset->path(), '/'),
+        );
+
+        $path = $operations->join('/');
+
+        return $this->signPath($path);
+    }
+
     private function buildImageBossPath(int $width, ?int $height): string
     {
         $source = config('statamic-imageboss.source');
