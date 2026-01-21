@@ -2,6 +2,15 @@
 
 All notable changes to `statamic-imageboss` will be documented in this file.
 
+## [0.1.1](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.1.1) (2026-01-21)
+
+### Features
+
+- add nullable setters and aspectRatio() method ([6d594db](https://github.com/jorisnoo/statamic-imageboss/commit/6d594dbd8a023326cfa03acec9126839e71a58a3))
+
+### Build System
+
+- link to changelog in releases ([9c15e23](https://github.com/jorisnoo/statamic-imageboss/commit/9c15e23512ec746b2bff966e3eb6e7b81ddb55d3))
 ## [0.1.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.1.0) (2026-01-21)
 
 ### Features
