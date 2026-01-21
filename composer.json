@@ -11,10 +11,15 @@
     ],
     "homepage": "https://github.com/jorisnoo/statamic-imageboss",
     "license": "MIT",
+    "support": {
+        "source": "https://github.com/jorisnoo/statamic-imageboss",
+        "issues": "https://github.com/jorisnoo/statamic-imageboss/issues"
+    },
     "authors": [
         {
             "name": "Joris Noordermeer",
             "email": "contact@noordermeer.ch",
+            "homepage": "https://github.com/jorisnoo",
             "role": "Developer"
         }
     ],
