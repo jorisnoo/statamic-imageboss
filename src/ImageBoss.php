@@ -15,7 +15,7 @@ class ImageBoss
 
         if (! $asset instanceof Asset) {
             throw new \InvalidArgumentException(
-                'ImageBoss::from() expects an Asset instance, got ' . get_debug_type($asset)
+                'ImageBoss::from() expects an Asset instance, got '.get_debug_type($asset)
             );
         }
 
