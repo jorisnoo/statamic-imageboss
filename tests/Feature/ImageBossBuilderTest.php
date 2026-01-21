@@ -236,3 +236,67 @@ it('provides helper methods via trait', function () {
         ->and(InterfacePreset::WithRatio->ratio())->toBe(2.0)
         ->and(InterfacePreset::WithInterval->interval())->toBe(150);
 });
+
+it('ignores null values passed to setter methods', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))
+        ->width(800)
+        ->height(null)
+        ->ratio(null)
+        ->min(300)
+        ->max(null)
+        ->interval(null);
+
+    $url = $builder->url();
+
+    expect($url)->toContain('width/800')
+        ->and($url)->not->toContain('cover/');
+
+    $srcset = $builder->srcset();
+
+    expect($srcset[0]['width'])->toBe(300);
+});
+
+it('returns explicit ratio from aspectRatio()', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->ratio(16 / 9);
+
+    expect($builder->aspectRatio())->toBe(16 / 9);
+});
+
+it('calculates aspectRatio() from width and height', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->width(800)->height(600);
+
+    expect($builder->aspectRatio())->toBe(800 / 600);
+});
+
+it('returns null from aspectRatio() when insufficient data', function () {
+    $asset = createMockAsset();
+
+    $builder = new ImageBossBuilder($asset);
+
+    expect($builder->aspectRatio())->toBeNull();
+
+    $builderWithWidth = (new ImageBossBuilder($asset))->width(800);
+
+    expect($builderWithWidth->aspectRatio())->toBeNull();
+
+    $builderWithHeight = (new ImageBossBuilder($asset))->height(600);
+
+    expect($builderWithHeight->aspectRatio())->toBeNull();
+});
+
+it('prefers explicit ratio over calculated ratio in aspectRatio()', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))
+        ->width(800)
+        ->height(600)
+        ->ratio(16 / 9);
+
+    expect($builder->aspectRatio())->toBe(16 / 9);
+});

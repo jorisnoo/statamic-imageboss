@@ -29,46 +29,83 @@ class ImageBossBuilder
         $this->asset = $asset;
     }
 
-    public function width(int $width): self
+    public function width(?int $width): self
     {
+        if ($width === null) {
+            return $this;
+        }
+
         $this->width = $width;
 
         return $this;
     }
 
-    public function height(int $height): self
+    public function height(?int $height): self
     {
+        if ($height === null) {
+            return $this;
+        }
+
         $this->height = $height;
 
         return $this;
     }
 
-    public function ratio(float $ratio): self
+    public function ratio(?float $ratio): self
     {
+        if ($ratio === null) {
+            return $this;
+        }
+
         $this->ratio = $ratio;
 
         return $this;
     }
 
-    public function min(int $min): self
+    public function min(?int $min): self
     {
+        if ($min === null) {
+            return $this;
+        }
+
         $this->min = $min;
 
         return $this;
     }
 
-    public function max(int $max): self
+    public function max(?int $max): self
     {
+        if ($max === null) {
+            return $this;
+        }
+
         $this->max = $max;
 
         return $this;
     }
 
-    public function interval(int $interval): self
+    public function interval(?int $interval): self
     {
+        if ($interval === null) {
+            return $this;
+        }
+
         $this->interval = $interval;
 
         return $this;
+    }
+
+    public function aspectRatio(): ?float
+    {
+        if ($this->ratio) {
+            return $this->ratio;
+        }
+
+        if ($this->width && $this->height) {
+            return $this->width / $this->height;
+        }
+
+        return null;
     }
 
     public function preset(ImagePreset|\BackedEnum|string $preset): self
