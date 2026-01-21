@@ -4,6 +4,7 @@ namespace Noo\StatamicImageboss\Tags;
 
 use Noo\StatamicImageboss\ImageBoss;
 use Statamic\Assets\Asset;
+use Statamic\Fields\Value;
 use Statamic\Tags\Tags;
 
 class ImagebossTag extends Tags
@@ -21,16 +22,11 @@ class ImagebossTag extends Tags
             return '';
         }
 
-        $width = $this->params->get('width');
-        $height = $this->params->get('height');
-        $ratio = $this->params->get('ratio');
-
-        $builder = app(ImageBoss::class)->from($asset)
-            ->width($width ? (int) $width : null)
-            ->height($height ? (int) $height : null)
-            ->ratio($ratio ? (float) $ratio : null);
-
-        return $builder->url();
+        return app(ImageBoss::class)->from($asset)
+            ->width($this->params->int('width'))
+            ->height($this->params->int('height'))
+            ->ratio($this->params->float('ratio'))
+            ->url();
     }
 
     /**
@@ -44,25 +40,18 @@ class ImagebossTag extends Tags
             return '';
         }
 
-        $preset = $this->params->get('preset');
-        $min = $this->params->get('min');
-        $max = $this->params->get('max');
-        $interval = $this->params->get('interval');
-        $ratio = $this->params->get('ratio');
-
         $builder = app(ImageBoss::class)->from($asset);
 
-        if ($preset) {
+        if ($preset = $this->params->get('preset')) {
             $builder->preset($preset);
         }
 
-        $builder
-            ->min($min ? (int) $min : null)
-            ->max($max ? (int) $max : null)
-            ->interval($interval ? (int) $interval : null)
-            ->ratio($ratio ? (float) $ratio : null);
-
-        return $builder->srcsetString();
+        return $builder
+            ->min($this->params->int('min'))
+            ->max($this->params->int('max'))
+            ->interval($this->params->int('interval'))
+            ->ratio($this->params->float('ratio'))
+            ->srcsetString();
     }
 
     private function getAsset(): ?Asset
@@ -79,12 +68,10 @@ class ImagebossTag extends Tags
             return $contextValue;
         }
 
-        if (is_object($contextValue) && method_exists($contextValue, 'value')) {
+        if ($contextValue instanceof Value) {
             $resolved = $contextValue->value();
 
-            if ($resolved instanceof Asset) {
-                return $resolved;
-            }
+            return $resolved instanceof Asset ? $resolved : null;
         }
 
         return null;
