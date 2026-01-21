@@ -2,6 +2,7 @@
 
 use Noo\StatamicImageboss\ImageBoss;
 use Noo\StatamicImageboss\ImageBossBuilder;
+use Noo\StatamicImageboss\Tests\Fixtures\InterfacePreset;
 use Noo\StatamicImageboss\Tests\Fixtures\TestPreset;
 
 beforeEach(function () {
@@ -179,4 +180,59 @@ it('applies interval from preset', function () {
     $widths = array_column($srcset, 'width');
 
     expect($widths)->toBe([200, 450, 700]);
+});
+
+it('accepts interface-based preset without config lookup', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->preset(InterfacePreset::Custom);
+
+    $srcset = $builder->srcset();
+
+    expect($srcset)->toBeArray()
+        ->and($srcset[0]['width'])->toBe(100)
+        ->and(end($srcset)['width'])->toBe(500);
+});
+
+it('applies ratio from interface-based preset', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->preset(InterfacePreset::WithRatio)->width(400);
+
+    $url = $builder->url();
+
+    expect($url)->toContain('cover/400x200');
+});
+
+it('applies interval from interface-based preset', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->preset(InterfacePreset::WithInterval);
+
+    $srcset = $builder->srcset();
+    $widths = array_column($srcset, 'width');
+
+    expect($widths)->toBe([150, 300, 450]);
+});
+
+it('interface preset takes precedence over config lookup', function () {
+    config()->set('statamic-imageboss.presets.custom', ['min' => 999, 'max' => 9999]);
+
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->preset(InterfacePreset::Custom);
+
+    $srcset = $builder->srcset();
+
+    expect($srcset[0]['width'])->toBe(100)
+        ->and(end($srcset)['width'])->toBe(500);
+});
+
+it('provides helper methods via trait', function () {
+    expect(InterfacePreset::Custom->min())->toBe(100)
+        ->and(InterfacePreset::Custom->max())->toBe(500)
+        ->and(InterfacePreset::Custom->ratio())->toBeNull()
+        ->and(InterfacePreset::Custom->interval())->toBeNull()
+        ->and(InterfacePreset::WithRatio->ratio())->toBe(2.0)
+        ->and(InterfacePreset::WithInterval->interval())->toBe(150);
 });

@@ -44,6 +44,10 @@ When `IMAGEBOSS_SOURCE` is not set, the package falls back to Statamic's Glide.
 
 ### Presets
 
+The package supports two approaches for defining presets: config-based and interface-based.
+
+#### Option 1: Config-Based Presets
+
 Define presets in `config/statamic-imageboss.php`:
 
 ```php
@@ -60,6 +64,51 @@ Define presets in `config/statamic-imageboss.php`:
     ],
 ],
 ```
+
+Good for: shared presets across projects, non-PHP templates.
+
+#### Option 2: Interface-Based Presets
+
+Implement the `ImagePreset` interface on your enum for self-contained presets:
+
+```php
+use Noo\StatamicImageboss\Concerns\HasImagePresetHelpers;
+use Noo\StatamicImageboss\Contracts\ImagePreset;
+
+enum Preset: string implements ImagePreset
+{
+    use HasImagePresetHelpers;
+
+    case Default = 'default';
+    case Thumbnail = 'thumbnail';
+    case Card = 'card';
+    case Hero = 'hero';
+
+    /**
+     * @return array{min: int, max: int, ratio?: float, interval?: int}
+     */
+    public function config(): array
+    {
+        return match ($this) {
+            self::Default => ['min' => 320, 'max' => 2560],
+            self::Thumbnail => ['min' => 200, 'max' => 700, 'ratio' => 1, 'interval' => 250],
+            self::Card => ['min' => 300, 'max' => 800, 'ratio' => 4 / 5],
+            self::Hero => ['min' => 640, 'max' => 3840],
+        };
+    }
+}
+```
+
+The `HasImagePresetHelpers` trait provides convenience methods:
+
+```php
+Preset::Hero->min();      // 640
+Preset::Hero->max();      // 3840
+Preset::Card->ratio();    // 0.8
+Preset::Thumbnail->interval(); // 250
+```
+
+Good for: type safety, self-documenting code, no config sync needed.
 
 ## Usage
 
@@ -107,16 +156,39 @@ $srcset = ImageBoss::from($asset)
     ->srcsetString();
 ```
 
-For type safety, create a backed enum matching your config presets:
+For type safety, create a backed enum. You can use either approach:
 
 ```php
+// Simple enum (requires config presets)
 enum Preset: string
 {
     case Hero = 'hero';
     case Thumbnail = 'thumbnail';
 }
 
+// Or interface-based (self-contained, no config needed)
+use Noo\StatamicImageboss\Concerns\HasImagePresetHelpers;
+use Noo\StatamicImageboss\Contracts\ImagePreset;
+
+enum Preset: string implements ImagePreset
+{
+    use HasImagePresetHelpers;
+
+    case Hero = 'hero';
+
+    public function config(): array
+    {
+        return match ($this) {
+            self::Hero => ['min' => 640, 'max' => 3840],
+        };
+    }
+}
+
+// Usage is the same for both
 $srcset = ImageBoss::from($asset)->preset(Preset::Hero)->srcsetString();
+
+// Interface presets also provide helper methods
+$aspectRatio = Preset::Hero->ratio();
 ```
 
 ### Builder Methods

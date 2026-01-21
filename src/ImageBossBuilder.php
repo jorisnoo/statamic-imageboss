@@ -3,6 +3,7 @@
 namespace Noo\StatamicImageboss;
 
 use Illuminate\Support\Str;
+use Noo\StatamicImageboss\Contracts\ImagePreset;
 use Statamic\Assets\Asset;
 use Statamic\Facades\Image;
 use Statamic\Facades\URL;
@@ -70,10 +71,14 @@ class ImageBossBuilder
         return $this;
     }
 
-    public function preset(\BackedEnum|string $preset): self
+    public function preset(ImagePreset|\BackedEnum|string $preset): self
     {
-        $presetName = $preset instanceof \BackedEnum ? $preset->value : $preset;
-        $config = config("statamic-imageboss.presets.{$presetName}", []);
+        if ($preset instanceof ImagePreset) {
+            $config = $preset->config();
+        } else {
+            $presetName = $preset instanceof \BackedEnum ? $preset->value : $preset;
+            $config = config("statamic-imageboss.presets.{$presetName}", []);
+        }
 
         if (empty($config)) {
             return $this;
