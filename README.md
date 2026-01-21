@@ -202,6 +202,8 @@ ImageBoss::from($asset)->ratio(16/9)->rias();
 
 Lazysizes replaces `{width}` with the calculated width and `{height}` based on the `--ls-aspectratio` CSS variable.
 
+> **Note:** RIAS URLs cannot be signed. The `{width}` and `{height}` placeholders are replaced at runtime by the client (e.g., lazysizes), which would invalidate any pre-computed signature. If you require signed URLs, use `srcsetString()` instead.
+
 When an asset has a focal point set, it's automatically included in the URL:
 
 ```

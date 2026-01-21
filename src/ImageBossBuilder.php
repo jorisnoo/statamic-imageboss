@@ -154,6 +154,12 @@ class ImageBossBuilder
             ->join(', ');
     }
 
+    /**
+     * Generate a RIAS (Responsive Images as a Service) URL with {width} and {height} placeholders.
+     *
+     * Note: RIAS URLs cannot be signed because the placeholders are replaced at runtime
+     * by the client (e.g., lazysizes), which would invalidate any pre-computed signature.
+     */
     public function rias(): string
     {
         $source = config('statamic-imageboss.source');
@@ -162,6 +168,7 @@ class ImageBossBuilder
             return $this->url();
         }
 
+        $baseUrl = config('statamic-imageboss.base_url', 'https://img.imageboss.me');
         $height = ($this->height || $this->ratio) ? '{height}' : null;
 
         $operations = collect(['', $source]);
@@ -185,9 +192,7 @@ class ImageBossBuilder
             ltrim($this->asset->path(), '/'),
         );
 
-        $path = $operations->join('/');
-
-        return $this->signPath($path);
+        return $baseUrl.$operations->join('/');
     }
 
     private function buildImageBossPath(int $width, ?int $height): string
