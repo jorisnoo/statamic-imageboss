@@ -31,7 +31,7 @@ class ImageBossBuilder
 
     public function width(?int $width): self
     {
-        if ($width === null) {
+        if ($width === null || $width < 1) {
             return $this;
         }
 
@@ -42,7 +42,7 @@ class ImageBossBuilder
 
     public function height(?int $height): self
     {
-        if ($height === null) {
+        if ($height === null || $height < 1) {
             return $this;
         }
 
@@ -53,7 +53,7 @@ class ImageBossBuilder
 
     public function ratio(?float $ratio): self
     {
-        if ($ratio === null) {
+        if ($ratio === null || $ratio <= 0) {
             return $this;
         }
 
@@ -64,7 +64,7 @@ class ImageBossBuilder
 
     public function min(?int $min): self
     {
-        if ($min === null) {
+        if ($min === null || $min < 1) {
             return $this;
         }
 
@@ -75,7 +75,7 @@ class ImageBossBuilder
 
     public function max(?int $max): self
     {
-        if ($max === null) {
+        if ($max === null || $max < 1) {
             return $this;
         }
 
@@ -86,7 +86,7 @@ class ImageBossBuilder
 
     public function interval(?int $interval): self
     {
-        if ($interval === null) {
+        if ($interval === null || $interval < 1) {
             return $this;
         }
 
@@ -114,6 +114,12 @@ class ImageBossBuilder
             $config = $preset->config();
         } else {
             $presetName = $preset instanceof \BackedEnum ? $preset->value : $preset;
+            $availablePresets = array_keys(config('statamic-imageboss.presets', []));
+
+            if (! in_array($presetName, $availablePresets, true)) {
+                return $this;
+            }
+
             $config = config("statamic-imageboss.presets.{$presetName}", []);
         }
 
@@ -226,7 +232,7 @@ class ImageBossBuilder
 
         $operations->push(
             $this->asset->container()->disk()->name ?? $this->asset->container()->handle(),
-            ltrim($this->asset->path(), '/'),
+            $this->sanitizePath($this->asset->path()),
         );
 
         return $baseUrl.$operations->join('/');
@@ -253,10 +259,18 @@ class ImageBossBuilder
 
         $operations->push(
             $this->asset->container()->disk()->name ?? $this->asset->container()->handle(),
-            ltrim($this->asset->path(), '/'),
+            $this->sanitizePath($this->asset->path()),
         );
 
         return $operations->join('/');
+    }
+
+    private function sanitizePath(string $path): string
+    {
+        $path = str_replace(['\\', '..'], ['/', ''], $path);
+        $path = (string) preg_replace('#/+#', '/', $path);
+
+        return ltrim($path, '/');
     }
 
     private function signPath(string $path): string
@@ -321,11 +335,28 @@ class ImageBossBuilder
             return null;
         }
 
-        [$focusX, $focusY] = Str::of($focus)->explode('-');
+        $parts = Str::of($focus)->explode('-');
+
+        if ($parts->count() !== 2) {
+            return null;
+        }
+
+        [$focusX, $focusY] = $parts;
+
+        if (! is_numeric($focusX) || ! is_numeric($focusY)) {
+            return null;
+        }
+
+        $focusX = (float) $focusX;
+        $focusY = (float) $focusY;
+
+        if ($focusX < 0 || $focusX > 100 || $focusY < 0 || $focusY > 100) {
+            return null;
+        }
 
         return [
-            'x' => round((float) $focusX / 100, 1),
-            'y' => round((float) $focusY / 100, 1),
+            'x' => round($focusX / 100, 1),
+            'y' => round($focusY / 100, 1),
         ];
     }
 
