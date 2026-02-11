@@ -2,6 +2,21 @@
 
 All notable changes to `statamic-imageboss` will be documented in this file.
 
+## [0.2.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.2.0) (2026-02-11)
+
+### Bug Fixes
+
+- add input validation and path sanitization ([1048d40](https://github.com/jorisnoo/statamic-imageboss/commit/1048d40ce302787ce00f9896d1111badd63044e0))
+
+### Code Refactoring
+
+- simplify ([95f419a](https://github.com/jorisnoo/statamic-imageboss/commit/95f419a2551fd649d3ff96028b3a98fc8eff1e71))
+- simplify tag methods using nullable setters ([de5cf79](https://github.com/jorisnoo/statamic-imageboss/commit/de5cf796b1f1b115628433ca301f1c158ed3455c))
+
+### Build System
+
+- allow statamic 6 ([c96319a](https://github.com/jorisnoo/statamic-imageboss/commit/c96319aa9f2e92f8f6f442352c6c12941e7637a1))
+- add support URLs and author homepage for Packagist ([a445bfa](https://github.com/jorisnoo/statamic-imageboss/commit/a445bfa5629c42c84884443aa3f54f2b0f419c90))
 ## [0.1.1](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.1.1) (2026-01-21)
 
 ### Features
