@@ -6,12 +6,12 @@ use Noo\StatamicImageboss\Tests\Fixtures\InterfacePreset;
 use Noo\StatamicImageboss\Tests\Fixtures\TestPreset;
 
 beforeEach(function () {
-    config()->set('statamic-imageboss.source', 'test-source');
-    config()->set('statamic-imageboss.secret', null);
-    config()->set('statamic-imageboss.base_url', 'https://img.imageboss.me');
-    config()->set('statamic-imageboss.default_width', 1000);
-    config()->set('statamic-imageboss.width_interval', 320);
-    config()->set('statamic-imageboss.presets', [
+    config()->set('statamic.imageboss.source', 'test-source');
+    config()->set('statamic.imageboss.secret', null);
+    config()->set('statamic.imageboss.base_url', 'https://img.imageboss.me');
+    config()->set('statamic.imageboss.default_width', 1000);
+    config()->set('statamic.imageboss.width_interval', 320);
+    config()->set('statamic.imageboss.presets', [
         'default' => ['min' => 320, 'max' => 2560],
         'thumbnail' => ['min' => 200, 'max' => 700, 'ratio' => 1, 'interval' => 250],
         'card' => ['min' => 300, 'max' => 800, 'ratio' => 0.8],
@@ -126,7 +126,7 @@ it('includes focal point in url', function () {
 });
 
 it('signs url when secret is configured', function () {
-    config()->set('statamic-imageboss.secret', 'test-secret');
+    config()->set('statamic.imageboss.secret', 'test-secret');
 
     $asset = createMockAsset();
 
@@ -138,7 +138,7 @@ it('signs url when secret is configured', function () {
 });
 
 it('uses default width from config when no width specified', function () {
-    config()->set('statamic-imageboss.default_width', 500);
+    config()->set('statamic.imageboss.default_width', 500);
 
     $asset = createMockAsset();
 
@@ -216,7 +216,7 @@ it('applies interval from interface-based preset', function () {
 });
 
 it('interface preset takes precedence over config lookup', function () {
-    config()->set('statamic-imageboss.presets.custom', ['min' => 999, 'max' => 9999]);
+    config()->set('statamic.imageboss.presets.custom', ['min' => 999, 'max' => 9999]);
 
     $asset = createMockAsset();
 

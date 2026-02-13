@@ -114,13 +114,13 @@ class ImageBossBuilder
             $config = $preset->config();
         } else {
             $presetName = $preset instanceof \BackedEnum ? $preset->value : $preset;
-            $availablePresets = array_keys(config('statamic-imageboss.presets', []));
+            $availablePresets = array_keys(config('statamic.imageboss.presets', []));
 
             if (! in_array($presetName, $availablePresets, true)) {
                 return $this;
             }
 
-            $config = config("statamic-imageboss.presets.{$presetName}", []);
+            $config = config("statamic.imageboss.presets.{$presetName}", []);
         }
 
         if (empty($config)) {
@@ -148,10 +148,10 @@ class ImageBossBuilder
 
     public function url(): string
     {
-        $width = $this->width ?? config('statamic-imageboss.default_width', 1000);
+        $width = $this->width ?? config('statamic.imageboss.default_width', 1000);
         $height = $this->calculateHeight($width);
 
-        $source = config('statamic-imageboss.source');
+        $source = config('statamic.imageboss.source');
 
         if (! $source) {
             return $this->generateGlideUrl($width, $height);
@@ -173,7 +173,7 @@ class ImageBossBuilder
             ->map(function (int $width) {
                 $height = $this->calculateHeight($width);
 
-                $source = config('statamic-imageboss.source');
+                $source = config('statamic.imageboss.source');
 
                 if (! $source) {
                     $url = $this->generateGlideUrl($width, $height);
@@ -205,13 +205,13 @@ class ImageBossBuilder
      */
     public function rias(): string
     {
-        $source = config('statamic-imageboss.source');
+        $source = config('statamic.imageboss.source');
 
         if (! $source) {
             return $this->url();
         }
 
-        $baseUrl = config('statamic-imageboss.base_url', 'https://img.imageboss.me');
+        $baseUrl = config('statamic.imageboss.base_url', 'https://img.imageboss.me');
         $height = ($this->height || $this->ratio) ? '{height}' : null;
 
         $operations = collect(['', $source]);
@@ -240,7 +240,7 @@ class ImageBossBuilder
 
     private function buildImageBossPath(int $width, ?int $height): string
     {
-        $source = config('statamic-imageboss.source');
+        $source = config('statamic.imageboss.source');
         $operations = collect(['', $source]);
 
         if ($height) {
@@ -275,8 +275,8 @@ class ImageBossBuilder
 
     private function signPath(string $path): string
     {
-        $baseUrl = config('statamic-imageboss.base_url', 'https://img.imageboss.me');
-        $secret = config('statamic-imageboss.secret');
+        $baseUrl = config('statamic.imageboss.base_url', 'https://img.imageboss.me');
+        $secret = config('statamic.imageboss.secret');
 
         if (! $secret) {
             return $baseUrl.$path;
@@ -303,9 +303,9 @@ class ImageBossBuilder
      */
     private function generateWidths(): array
     {
-        $min = $this->min ?? config('statamic-imageboss.presets.default.min', 320);
-        $max = $this->max ?? config('statamic-imageboss.presets.default.max', 2560);
-        $interval = $this->interval ?? config('statamic-imageboss.width_interval', 320);
+        $min = $this->min ?? config('statamic.imageboss.presets.default.min', 320);
+        $max = $this->max ?? config('statamic.imageboss.presets.default.max', 2560);
+        $interval = $this->interval ?? config('statamic.imageboss.width_interval', 320);
 
         $widths = [];
 
