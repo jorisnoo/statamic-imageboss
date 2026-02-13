@@ -2,6 +2,11 @@
 
 All notable changes to `statamic-imageboss` will be documented in this file.
 
+## [0.3.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.0) (2026-02-13)
+
+### Code Refactoring
+
+- move config to statamic namespace (statamic.imageboss) ([48c783f](https://github.com/jorisnoo/statamic-imageboss/commit/48c783fd0fe8cf71b00935bafafa832d133aa1a9))
 ## [0.2.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.2.0) (2026-02-11)
 
 ### Bug Fixes
