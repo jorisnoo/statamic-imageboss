@@ -2,6 +2,7 @@
 
 use Noo\StatamicImageboss\ImageBoss;
 use Noo\StatamicImageboss\ImageBossBuilder;
+use Noo\StatamicImageboss\NullImageBossBuilder;
 use Noo\StatamicImageboss\Tests\Fixtures\InterfacePreset;
 use Noo\StatamicImageboss\Tests\Fixtures\TestPreset;
 
@@ -301,17 +302,41 @@ it('prefers explicit ratio over calculated ratio in aspectRatio()', function () 
     expect($builder->aspectRatio())->toBe(16 / 9);
 });
 
-it('returns null from factory when asset is null', function () {
+it('returns NullImageBossBuilder from factory when asset is null', function () {
     $imageBoss = new ImageBoss;
 
-    expect($imageBoss->from(null))->toBeNull();
+    $result = $imageBoss->from(null);
+
+    expect($result)->toBeInstanceOf(NullImageBossBuilder::class)
+        ->and($result->url())->toBe('');
 });
 
-it('returns null from factory when Value unwraps to null', function () {
+it('returns NullImageBossBuilder from factory when Value unwraps to null', function () {
     $value = Mockery::mock(\Statamic\Fields\Value::class);
     $value->shouldReceive('value')->andReturn(null);
 
     $imageBoss = new ImageBoss;
 
-    expect($imageBoss->from($value))->toBeNull();
+    $result = $imageBoss->from($value);
+
+    expect($result)->toBeInstanceOf(NullImageBossBuilder::class)
+        ->and($result->url())->toBe('');
+});
+
+it('returns empty values from null builder', function () {
+    $builder = new NullImageBossBuilder;
+
+    expect($builder->url())->toBe('')
+        ->and($builder->srcset())->toBe([])
+        ->and($builder->srcsetString())->toBe('')
+        ->and($builder->rias())->toBe('')
+        ->and($builder->aspectRatio())->toBeNull();
+});
+
+it('allows chaining on null builder', function () {
+    $builder = new NullImageBossBuilder;
+
+    $result = $builder->width(800)->height(600)->ratio(16 / 9)->min(320)->max(2560)->interval(320)->url();
+
+    expect($result)->toBe('');
 });

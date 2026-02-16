@@ -7,14 +7,14 @@ use Statamic\Fields\Value;
 
 class ImageBoss
 {
-    public function from(mixed $asset): ?ImageBossBuilder
+    public function from(mixed $asset): ImageBossBuilder
     {
         if ($asset instanceof Value) {
             $asset = $asset->value();
         }
 
         if ($asset === null) {
-            return null;
+            return new NullImageBossBuilder;
         }
 
         if (! $asset instanceof Asset) {
