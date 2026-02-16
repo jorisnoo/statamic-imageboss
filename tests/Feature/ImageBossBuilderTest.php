@@ -300,3 +300,18 @@ it('prefers explicit ratio over calculated ratio in aspectRatio()', function () 
 
     expect($builder->aspectRatio())->toBe(16 / 9);
 });
+
+it('returns null from factory when asset is null', function () {
+    $imageBoss = new ImageBoss;
+
+    expect($imageBoss->from(null))->toBeNull();
+});
+
+it('returns null from factory when Value unwraps to null', function () {
+    $value = Mockery::mock(\Statamic\Fields\Value::class);
+    $value->shouldReceive('value')->andReturn(null);
+
+    $imageBoss = new ImageBoss;
+
+    expect($imageBoss->from($value))->toBeNull();
+});

@@ -8,7 +8,7 @@ use Statamic\Assets\Asset;
 use Statamic\Fields\Value;
 
 /**
- * @method static ImageBossBuilder from(Asset|Value $asset)
+ * @method static ?ImageBossBuilder from(Asset|Value|null $asset)
  *
  * @see \Noo\StatamicImageboss\ImageBoss
  * @see ImageBossBuilder::url() For fixed-dimension URLs
