@@ -26,7 +26,7 @@ class StatamicImagebossServiceProvider extends PackageServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/statamic/imageboss.php' => config_path('statamic/imageboss.php'),
-            ], 'statamic-imageboss');
+            ], 'imageboss-config');
         }
 
         Statamic::tag('imageboss', ImagebossTag::class);

@@ -17,7 +17,7 @@ composer require jorisnoo/statamic-imageboss
 Publish the configuration:
 
 ```bash
-php artisan vendor:publish --tag="statamic-imageboss-config"
+php artisan vendor:publish --tag="imageboss-config"
 ```
 
 ## Configuration
@@ -48,7 +48,7 @@ The package supports two approaches for defining presets: config-based and inter
 
 #### Option 1: Config-Based Presets
 
-Define presets in `config/statamic-imageboss.php`:
+Define presets in `config/statamic/imageboss.php`:
 
 ```php
 'presets' => [
