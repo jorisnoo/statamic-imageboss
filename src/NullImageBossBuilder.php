@@ -6,9 +6,7 @@ use Noo\StatamicImageboss\Contracts\ImagePreset;
 
 class NullImageBossBuilder extends ImageBossBuilder
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function width(?int $width): self
     {
