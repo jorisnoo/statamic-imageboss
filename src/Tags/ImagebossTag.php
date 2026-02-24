@@ -54,6 +54,24 @@ class ImagebossTag extends Tags
             ->srcsetString();
     }
 
+    /**
+     * {{ imageboss:placeholder src="image" width="800" ratio="1.777" }}
+     */
+    public function placeholder(): string
+    {
+        $asset = $this->getAsset();
+
+        if (! $asset) {
+            return '';
+        }
+
+        return app(ImageBoss::class)->from($asset)
+            ->width($this->params->int('width'))
+            ->height($this->params->int('height'))
+            ->ratio($this->params->float('ratio'))
+            ->placeholder();
+    }
+
     private function getAsset(): ?Asset
     {
         $src = $this->params->get('src');

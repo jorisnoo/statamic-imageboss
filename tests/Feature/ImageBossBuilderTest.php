@@ -340,3 +340,51 @@ it('allows chaining on null builder', function () {
 
     expect($result)->toBe('');
 });
+
+it('generates placeholder with explicit width and height', function () {
+    $asset = createMockAsset();
+
+    $placeholder = (new ImageBossBuilder($asset))->width(800)->height(600)->placeholder();
+
+    expect($placeholder)->toBe("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3C/svg%3E");
+});
+
+it('generates placeholder with width and ratio', function () {
+    $asset = createMockAsset();
+
+    $placeholder = (new ImageBossBuilder($asset))->width(800)->ratio(16 / 9)->placeholder();
+
+    expect($placeholder)->toBe("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3C/svg%3E");
+});
+
+it('generates placeholder from asset native dimensions', function () {
+    $asset = createMockAsset(width: 1920, height: 1080);
+
+    $placeholder = (new ImageBossBuilder($asset))->placeholder();
+
+    expect($placeholder)->toBe("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3C/svg%3E");
+});
+
+it('returns empty string for placeholder when dimensions are unresolvable', function () {
+    $asset = createMockAsset();
+    $asset->shouldReceive('width')->andReturn(null);
+    $asset->shouldReceive('height')->andReturn(null);
+
+    $placeholder = (new ImageBossBuilder($asset))->placeholder();
+
+    expect($placeholder)->toBe('');
+});
+
+it('returns empty string for placeholder from null builder', function () {
+    $builder = new NullImageBossBuilder;
+
+    expect($builder->placeholder())->toBe('');
+});
+
+it('generates placeholder starting with data uri prefix', function () {
+    $asset = createMockAsset(width: 400, height: 300);
+
+    $placeholder = (new ImageBossBuilder($asset))->placeholder();
+
+    expect($placeholder)->toStartWith('data:image/svg+xml,');
+});

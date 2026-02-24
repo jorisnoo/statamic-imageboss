@@ -238,6 +238,40 @@ class ImageBossBuilder
         return $baseUrl.$operations->join('/');
     }
 
+    public function placeholder(): string
+    {
+        [$width, $height] = $this->resolvePlaceholderDimensions();
+
+        if ($width === null || $height === null) {
+            return '';
+        }
+
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='{$width}' height='{$height}'%3E%3C/svg%3E";
+    }
+
+    /**
+     * @return array{?int, ?int}
+     */
+    private function resolvePlaceholderDimensions(): array
+    {
+        if ($this->width && $this->height) {
+            return [$this->width, $this->height];
+        }
+
+        if ($this->width && $this->ratio) {
+            return [$this->width, $this->calculateHeight($this->width)];
+        }
+
+        $assetWidth = $this->asset->width();
+        $assetHeight = $this->asset->height();
+
+        if ($assetWidth && $assetHeight) {
+            return [$assetWidth, $assetHeight];
+        }
+
+        return [null, null];
+    }
+
     private function buildImageBossPath(int $width, ?int $height): string
     {
         $source = config('statamic.imageboss.source');

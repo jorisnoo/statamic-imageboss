@@ -66,6 +66,11 @@ class NullImageBossBuilder extends ImageBossBuilder
         return '';
     }
 
+    public function placeholder(): string
+    {
+        return '';
+    }
+
     public function aspectRatio(): ?float
     {
         return null;

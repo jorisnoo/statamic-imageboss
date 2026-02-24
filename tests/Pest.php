@@ -4,7 +4,7 @@ use Noo\StatamicImageboss\Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
 
-function createMockAsset(bool $hasFocus = false, ?string $focusValue = null): Mockery\MockInterface
+function createMockAsset(bool $hasFocus = false, ?string $focusValue = null, ?int $width = null, ?int $height = null): Mockery\MockInterface
 {
     $disk = Mockery::mock();
     $disk->name = 'assets';
@@ -24,6 +24,14 @@ function createMockAsset(bool $hasFocus = false, ?string $focusValue = null): Mo
     $asset->shouldReceive('container')->andReturn($container);
     $asset->shouldReceive('data')->andReturn($data);
     $asset->shouldReceive('path')->andReturn('/test.jpg');
+
+    if ($width !== null) {
+        $asset->shouldReceive('width')->andReturn($width);
+    }
+
+    if ($height !== null) {
+        $asset->shouldReceive('height')->andReturn($height);
+    }
 
     return $asset;
 }
