@@ -371,7 +371,7 @@ class ImageBossBuilder
 
         $parts = Str::of($focus)->explode('-');
 
-        if ($parts->count() !== 2) {
+        if ($parts->count() < 2 || $parts->count() > 3) {
             return null;
         }
 

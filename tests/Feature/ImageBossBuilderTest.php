@@ -117,6 +117,16 @@ it('calculates height from ratio', function () {
 });
 
 it('includes focal point in url', function () {
+    $asset = createMockAsset(true, '25-75-1');
+
+    $builder = (new ImageBossBuilder($asset))->width(800);
+
+    $url = $builder->url();
+
+    expect($url)->toContain('fp-x:0.3,fp-y:0.8');
+});
+
+it('includes focal point from two-part format in url', function () {
     $asset = createMockAsset(true, '25-75');
 
     $builder = (new ImageBossBuilder($asset))->width(800);
