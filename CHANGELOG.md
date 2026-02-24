@@ -2,6 +2,19 @@
 
 All notable changes to `statamic-imageboss` will be documented in this file.
 
+## [0.3.1](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.1) (2026-02-24)
+
+### Features
+
+- add placeholder method to generate inline SVG data URIs for layout stability ([9719cf9](https://github.com/jorisnoo/statamic-imageboss/commit/9719cf94c884caee3dbcf2a1b04cdd06b8738867))
+- replace null return with NullImageBossBuilder null object pattern for safer chaining ([d85eabe](https://github.com/jorisnoo/statamic-imageboss/commit/d85eabe5678c266a9a11e394266090712c950085))
+- return null from ImageBoss::from() when asset is null instead of throwing ([5e57764](https://github.com/jorisnoo/statamic-imageboss/commit/5e577648f955c3d15bea94ae903648a3cbb39533))
+
+### Bug Fixes
+
+- support three-part focal point format in focus string validation ([69513fc](https://github.com/jorisnoo/statamic-imageboss/commit/69513fc1192c56910fd02efd79e2034b4251501f))
+- add crop_focal fit when height is specified in image manipulation ([2e75b89](https://github.com/jorisnoo/statamic-imageboss/commit/2e75b89b3740235843da24f873ec39925cca34bd))
+- update publish tag and config path references in README and service provider ([b1ac9f8](https://github.com/jorisnoo/statamic-imageboss/commit/b1ac9f89cde125be592cc8e8dee9a810b8a5630b))
 ## [0.3.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.0) (2026-02-13)
 
 ### Code Refactoring
