@@ -292,7 +292,7 @@ class ImageBossBuilder
         $manipulation = Image::manipulate($this->asset)->width($width);
 
         if ($height) {
-            $manipulation->height($height);
+            $manipulation->height($height)->fit('crop_focal');
         }
 
         return URL::makeAbsolute($manipulation->build());
