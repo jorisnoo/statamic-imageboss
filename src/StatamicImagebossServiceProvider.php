@@ -2,9 +2,12 @@
 
 namespace Noo\StatamicImageboss;
 
+use Illuminate\Support\Facades\Event;
+use Noo\StatamicImageboss\Listeners\PurgeAssetFromImageBoss;
 use Noo\StatamicImageboss\Tags\ImagebossTag;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Statamic\Events\AssetReuploaded;
 use Statamic\Statamic;
 
 class StatamicImagebossServiceProvider extends PackageServiceProvider
@@ -30,5 +33,9 @@ class StatamicImagebossServiceProvider extends PackageServiceProvider
         }
 
         Statamic::tag('imageboss', ImagebossTag::class);
+
+        if (filled(config('statamic.imageboss.api_key'))) {
+            Event::listen(AssetReuploaded::class, PurgeAssetFromImageBoss::class);
+        }
     }
 }

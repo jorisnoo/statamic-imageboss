@@ -28,6 +28,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | ImageBoss API Key
+    |--------------------------------------------------------------------------
+    |
+    | API key for cache purging. When set, the package will automatically
+    | purge ImageBoss cache when assets are reuploaded in Statamic.
+    |
+    */
+
+    'api_key' => env('IMAGEBOSS_API_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
     | ImageBoss Base URL
     |--------------------------------------------------------------------------
     |
