@@ -4,9 +4,9 @@
 
 ## Requirements
 
-- PHP 8.2+
+- PHP 8.3+
 - Laravel 11+
-- Statamic 5
+- Statamic 5 or 6
 
 ## Installation
 
