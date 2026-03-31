@@ -396,14 +396,12 @@ class ImageBossBuilder
 
     private function calculateHeight(int $width): ?int
     {
-        if ($this->height) {
-            return $this->height;
+        $ratio = $this->aspectRatio();
+
+        if ($ratio) {
+            return (int) round($width / $ratio);
         }
 
-        if (! $this->ratio) {
-            return null;
-        }
-
-        return (int) round($width / $this->ratio);
+        return null;
     }
 }
