@@ -398,3 +398,372 @@ it('generates placeholder starting with data uri prefix', function () {
 
     expect($placeholder)->toStartWith('data:image/svg+xml,');
 });
+
+// RIAS URL generation
+
+it('generates rias url with width placeholder', function () {
+    $asset = createMockAsset();
+
+    $rias = (new ImageBossBuilder($asset))->rias();
+
+    expect($rias)->toContain('test-source')
+        ->and($rias)->toContain('width/{width}')
+        ->and($rias)->toContain('format:auto')
+        ->and($rias)->toContain('test.jpg');
+});
+
+it('generates rias url with cover and height placeholder when height is set', function () {
+    $asset = createMockAsset();
+
+    $rias = (new ImageBossBuilder($asset))->height(600)->rias();
+
+    expect($rias)->toContain('cover/{width}x{height}');
+});
+
+it('generates rias url with cover and height placeholder when ratio is set', function () {
+    $asset = createMockAsset();
+
+    $rias = (new ImageBossBuilder($asset))->ratio(16 / 9)->rias();
+
+    expect($rias)->toContain('cover/{width}x{height}');
+});
+
+it('includes focal point in rias url', function () {
+    $asset = createMockAsset(true, '50-50-1');
+
+    $rias = (new ImageBossBuilder($asset))->rias();
+
+    expect($rias)->toContain('fp-x:0.5,fp-y:0.5');
+});
+
+it('falls back to regular url for rias when source is not configured', function () {
+    config()->set('statamic.imageboss.source', null);
+
+    $asset = createMockAsset();
+
+    $mockManipulation = Mockery::mock();
+    $mockManipulation->shouldReceive('width')->andReturn($mockManipulation);
+    $mockManipulation->shouldReceive('build')->andReturn('/glide/test.jpg?w=1000');
+
+    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($mockManipulation);
+    Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=1000');
+
+    $rias = (new ImageBossBuilder($asset))->rias();
+
+    expect($rias)->toContain('glide');
+});
+
+// Glide fallback
+
+it('falls back to glide url when source is not configured', function () {
+    config()->set('statamic.imageboss.source', null);
+
+    $asset = createMockAsset();
+
+    $mockManipulation = Mockery::mock();
+    $mockManipulation->shouldReceive('width')->andReturn($mockManipulation);
+    $mockManipulation->shouldReceive('build')->andReturn('/glide/test.jpg?w=800');
+
+    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($mockManipulation);
+    Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=800');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->toBe('http://localhost/glide/test.jpg?w=800');
+});
+
+it('falls back to glide url with crop_focal when height is set', function () {
+    config()->set('statamic.imageboss.source', null);
+
+    $asset = createMockAsset();
+
+    $mockManipulation = Mockery::mock();
+    $mockManipulation->shouldReceive('width')->andReturn($mockManipulation);
+    $mockManipulation->shouldReceive('height')->andReturn($mockManipulation);
+    $mockManipulation->shouldReceive('fit')->with('crop_focal')->andReturn($mockManipulation);
+    $mockManipulation->shouldReceive('build')->andReturn('/glide/test.jpg?w=800&h=600&fit=crop_focal');
+
+    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($mockManipulation);
+    Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=800&h=600');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->height(600)->url();
+
+    expect($url)->toBe('http://localhost/glide/test.jpg?w=800&h=600');
+});
+
+it('generates glide srcset when source is not configured', function () {
+    config()->set('statamic.imageboss.source', null);
+
+    $asset = createMockAsset();
+
+    $mockManipulation = Mockery::mock();
+    $mockManipulation->shouldReceive('width')->andReturn($mockManipulation);
+    $mockManipulation->shouldReceive('build')->andReturn('/glide/test.jpg');
+
+    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($mockManipulation);
+    Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg');
+
+    $srcset = (new ImageBossBuilder($asset))->min(300)->max(500)->interval(200)->srcset();
+
+    expect($srcset)->toHaveCount(2)
+        ->and($srcset[0]['width'])->toBe(300)
+        ->and($srcset[1]['width'])->toBe(500);
+});
+
+// Focal point edge cases
+
+it('ignores focal point when focus data is not a string', function () {
+    $data = Mockery::mock();
+    $data->shouldReceive('has')->with('focus')->andReturn(true);
+    $data->shouldReceive('get')->with('focus')->andReturn(123);
+
+    $disk = Mockery::mock();
+    $disk->name = 'assets';
+
+    $container = Mockery::mock();
+    $container->shouldReceive('disk')->andReturn($disk);
+
+    $asset = Mockery::mock(Statamic\Assets\Asset::class);
+    $asset->shouldReceive('container')->andReturn($container);
+    $asset->shouldReceive('data')->andReturn($data);
+    $asset->shouldReceive('path')->andReturn('/test.jpg');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->not->toContain('fp-x:')
+        ->and($url)->toContain('format:auto');
+});
+
+it('ignores focal point when focus string has no dash', function () {
+    $data = Mockery::mock();
+    $data->shouldReceive('has')->with('focus')->andReturn(true);
+    $data->shouldReceive('get')->with('focus')->andReturn('center');
+
+    $disk = Mockery::mock();
+    $disk->name = 'assets';
+
+    $container = Mockery::mock();
+    $container->shouldReceive('disk')->andReturn($disk);
+
+    $asset = Mockery::mock(Statamic\Assets\Asset::class);
+    $asset->shouldReceive('container')->andReturn($container);
+    $asset->shouldReceive('data')->andReturn($data);
+    $asset->shouldReceive('path')->andReturn('/test.jpg');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->not->toContain('fp-x:');
+});
+
+it('ignores focal point with too many parts', function () {
+    $asset = createMockAsset(true, '25-75-1-extra');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->not->toContain('fp-x:');
+});
+
+it('ignores focal point with non-numeric values', function () {
+    $asset = createMockAsset(true, 'abc-def');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->not->toContain('fp-x:');
+});
+
+it('ignores focal point with out-of-range values', function () {
+    $asset = createMockAsset(true, '150-50-1');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->not->toContain('fp-x:');
+});
+
+it('handles focal point at boundary values 0 and 100', function () {
+    $asset = createMockAsset(true, '0-100-1');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->toContain('fp-x:0,fp-y:1');
+});
+
+// URL signing verification
+
+it('generates correct bossToken signature', function () {
+    config()->set('statamic.imageboss.secret', 'my-secret');
+
+    $asset = createMockAsset();
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    // Reconstruct the expected path and hash
+    $path = '/test-source/width/800/format:auto/assets/test.jpg';
+    $expectedToken = hash_hmac('sha256', $path, 'my-secret');
+
+    expect($url)->toContain("?bossToken={$expectedToken}");
+});
+
+it('does not append bossToken when secret is null', function () {
+    config()->set('statamic.imageboss.secret', null);
+
+    $asset = createMockAsset();
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->not->toContain('bossToken');
+});
+
+// Path sanitization
+
+it('sanitizes backslashes in asset path', function () {
+    $disk = Mockery::mock();
+    $disk->name = 'assets';
+
+    $container = Mockery::mock();
+    $container->shouldReceive('disk')->andReturn($disk);
+
+    $data = Mockery::mock();
+    $data->shouldReceive('has')->with('focus')->andReturn(false);
+
+    $asset = Mockery::mock(Statamic\Assets\Asset::class);
+    $asset->shouldReceive('container')->andReturn($container);
+    $asset->shouldReceive('data')->andReturn($data);
+    $asset->shouldReceive('path')->andReturn('folder\\image.jpg');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->toContain('folder/image.jpg')
+        ->and($url)->not->toContain('\\');
+});
+
+it('sanitizes double dots in asset path', function () {
+    $disk = Mockery::mock();
+    $disk->name = 'assets';
+
+    $container = Mockery::mock();
+    $container->shouldReceive('disk')->andReturn($disk);
+
+    $data = Mockery::mock();
+    $data->shouldReceive('has')->with('focus')->andReturn(false);
+
+    $asset = Mockery::mock(Statamic\Assets\Asset::class);
+    $asset->shouldReceive('container')->andReturn($container);
+    $asset->shouldReceive('data')->andReturn($data);
+    $asset->shouldReceive('path')->andReturn('folder/../secret/image.jpg');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->not->toContain('..');
+});
+
+it('collapses multiple slashes in asset path', function () {
+    $disk = Mockery::mock();
+    $disk->name = 'assets';
+
+    $container = Mockery::mock();
+    $container->shouldReceive('disk')->andReturn($disk);
+
+    $data = Mockery::mock();
+    $data->shouldReceive('has')->with('focus')->andReturn(false);
+
+    $asset = Mockery::mock(Statamic\Assets\Asset::class);
+    $asset->shouldReceive('container')->andReturn($container);
+    $asset->shouldReceive('data')->andReturn($data);
+    $asset->shouldReceive('path')->andReturn('folder///image.jpg');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->toContain('folder/image.jpg')
+        ->and($url)->not->toContain('///');
+});
+
+// ImageBoss::from() error handling
+
+it('throws InvalidArgumentException for non-asset input', function () {
+    $imageBoss = new ImageBoss;
+
+    $imageBoss->from('not-an-asset');
+})->throws(\InvalidArgumentException::class);
+
+it('unwraps Value objects before checking asset type', function () {
+    $asset = createMockAsset();
+
+    $value = Mockery::mock(\Statamic\Fields\Value::class);
+    $value->shouldReceive('value')->andReturn($asset);
+
+    $imageBoss = new ImageBoss;
+
+    $result = $imageBoss->from($value);
+
+    expect($result)->toBeInstanceOf(ImageBossBuilder::class);
+});
+
+// Setter edge cases
+
+it('ignores zero width', function () {
+    $asset = createMockAsset();
+
+    $url = (new ImageBossBuilder($asset))->width(0)->url();
+
+    expect($url)->toContain('width/1000'); // falls back to default
+});
+
+it('ignores negative width', function () {
+    $asset = createMockAsset();
+
+    $url = (new ImageBossBuilder($asset))->width(-100)->url();
+
+    expect($url)->toContain('width/1000');
+});
+
+it('ignores zero ratio', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->ratio(0.0);
+
+    expect($builder->aspectRatio())->toBeNull();
+});
+
+it('ignores negative ratio', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->ratio(-1.5);
+
+    expect($builder->aspectRatio())->toBeNull();
+});
+
+it('ignores non-existent preset', function () {
+    $asset = createMockAsset();
+
+    $builder = (new ImageBossBuilder($asset))->preset('nonexistent');
+
+    $srcset = $builder->srcset();
+    $widths = array_column($srcset, 'width');
+
+    // Falls back to defaults from config
+    expect($widths[0])->toBe(320)
+        ->and(end($widths))->toBe(2560);
+});
+
+// Container disk name fallback
+
+it('uses container handle when disk name is null', function () {
+    $disk = Mockery::mock();
+    $disk->name = null;
+
+    $container = Mockery::mock();
+    $container->shouldReceive('disk')->andReturn($disk);
+    $container->shouldReceive('handle')->andReturn('my-handle');
+
+    $data = Mockery::mock();
+    $data->shouldReceive('has')->with('focus')->andReturn(false);
+
+    $asset = Mockery::mock(Statamic\Assets\Asset::class);
+    $asset->shouldReceive('container')->andReturn($container);
+    $asset->shouldReceive('data')->andReturn($data);
+    $asset->shouldReceive('path')->andReturn('/test.jpg');
+
+    $url = (new ImageBossBuilder($asset))->width(800)->url();
+
+    expect($url)->toContain('my-handle');
+});
