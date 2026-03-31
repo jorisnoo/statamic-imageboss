@@ -2,6 +2,11 @@
 
 All notable changes to `statamic-imageboss` will be documented in this file.
 
+## [0.3.2](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.2) (2026-03-31)
+
+### Chores
+
+- remove workflows and update dependencies ([0e85ee2](https://github.com/jorisnoo/statamic-imageboss/commit/0e85ee2c17123e2674a6f9e5343810fe4282b0c0))
 ## [0.3.1](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.1) (2026-02-24)
 
 ### Features
