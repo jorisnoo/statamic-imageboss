@@ -437,15 +437,9 @@ it('includes focal point in rias url', function () {
 });
 
 it('falls back to regular url for rias when source is not configured', function () {
-    config()->set('statamic.imageboss.source', null);
-
     $asset = createMockAsset();
 
-    $mockManipulation = Mockery::mock();
-    $mockManipulation->shouldReceive('width')->andReturn($mockManipulation);
-    $mockManipulation->shouldReceive('build')->andReturn('/glide/test.jpg?w=1000');
-
-    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($mockManipulation);
+    createGlideMock();
     Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=1000');
 
     $rias = (new ImageBossBuilder($asset))->rias();
@@ -456,15 +450,9 @@ it('falls back to regular url for rias when source is not configured', function 
 // Glide fallback
 
 it('falls back to glide url when source is not configured', function () {
-    config()->set('statamic.imageboss.source', null);
-
     $asset = createMockAsset();
 
-    $mockManipulation = Mockery::mock();
-    $mockManipulation->shouldReceive('width')->andReturn($mockManipulation);
-    $mockManipulation->shouldReceive('build')->andReturn('/glide/test.jpg?w=800');
-
-    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($mockManipulation);
+    createGlideMock();
     Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=800');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
@@ -473,17 +461,9 @@ it('falls back to glide url when source is not configured', function () {
 });
 
 it('falls back to glide url with crop_focal when height is set', function () {
-    config()->set('statamic.imageboss.source', null);
-
     $asset = createMockAsset();
 
-    $mockManipulation = Mockery::mock();
-    $mockManipulation->shouldReceive('width')->andReturn($mockManipulation);
-    $mockManipulation->shouldReceive('height')->andReturn($mockManipulation);
-    $mockManipulation->shouldReceive('fit')->with('crop_focal')->andReturn($mockManipulation);
-    $mockManipulation->shouldReceive('build')->andReturn('/glide/test.jpg?w=800&h=600&fit=crop_focal');
-
-    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($mockManipulation);
+    createGlideMock(['height' => null, 'fit' => 'crop_focal']);
     Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=800&h=600');
 
     $url = (new ImageBossBuilder($asset))->width(800)->height(600)->url();
@@ -492,41 +472,21 @@ it('falls back to glide url with crop_focal when height is set', function () {
 });
 
 it('generates glide srcset when source is not configured', function () {
-    config()->set('statamic.imageboss.source', null);
-
     $asset = createMockAsset();
 
-    $mockManipulation = Mockery::mock();
-    $mockManipulation->shouldReceive('width')->andReturn($mockManipulation);
-    $mockManipulation->shouldReceive('build')->andReturn('/glide/test.jpg');
-
-    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($mockManipulation);
+    createGlideMock();
     Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg');
 
     $srcset = (new ImageBossBuilder($asset))->min(300)->max(500)->interval(200)->srcset();
+    $widths = array_column($srcset, 'width');
 
-    expect($srcset)->toHaveCount(2)
-        ->and($srcset[0]['width'])->toBe(300)
-        ->and($srcset[1]['width'])->toBe(500);
+    expect($widths)->toBe([300, 500]);
 });
 
 // Focal point edge cases
 
 it('ignores focal point when focus data is not a string', function () {
-    $data = Mockery::mock();
-    $data->shouldReceive('has')->with('focus')->andReturn(true);
-    $data->shouldReceive('get')->with('focus')->andReturn(123);
-
-    $disk = Mockery::mock();
-    $disk->name = 'assets';
-
-    $container = Mockery::mock();
-    $container->shouldReceive('disk')->andReturn($disk);
-
-    $asset = Mockery::mock(Statamic\Assets\Asset::class);
-    $asset->shouldReceive('container')->andReturn($container);
-    $asset->shouldReceive('data')->andReturn($data);
-    $asset->shouldReceive('path')->andReturn('/test.jpg');
+    $asset = createMockAsset(hasFocus: true, focusValue: 123);
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
@@ -535,20 +495,7 @@ it('ignores focal point when focus data is not a string', function () {
 });
 
 it('ignores focal point when focus string has no dash', function () {
-    $data = Mockery::mock();
-    $data->shouldReceive('has')->with('focus')->andReturn(true);
-    $data->shouldReceive('get')->with('focus')->andReturn('center');
-
-    $disk = Mockery::mock();
-    $disk->name = 'assets';
-
-    $container = Mockery::mock();
-    $container->shouldReceive('disk')->andReturn($disk);
-
-    $asset = Mockery::mock(Statamic\Assets\Asset::class);
-    $asset->shouldReceive('container')->andReturn($container);
-    $asset->shouldReceive('data')->andReturn($data);
-    $asset->shouldReceive('path')->andReturn('/test.jpg');
+    $asset = createMockAsset(hasFocus: true, focusValue: 'center');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
@@ -596,7 +543,6 @@ it('generates correct bossToken signature', function () {
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
-    // Reconstruct the expected path and hash
     $path = '/test-source/width/800/format:auto/assets/test.jpg';
     $expectedToken = hash_hmac('sha256', $path, 'my-secret');
 
@@ -616,19 +562,7 @@ it('does not append bossToken when secret is null', function () {
 // Path sanitization
 
 it('sanitizes backslashes in asset path', function () {
-    $disk = Mockery::mock();
-    $disk->name = 'assets';
-
-    $container = Mockery::mock();
-    $container->shouldReceive('disk')->andReturn($disk);
-
-    $data = Mockery::mock();
-    $data->shouldReceive('has')->with('focus')->andReturn(false);
-
-    $asset = Mockery::mock(Statamic\Assets\Asset::class);
-    $asset->shouldReceive('container')->andReturn($container);
-    $asset->shouldReceive('data')->andReturn($data);
-    $asset->shouldReceive('path')->andReturn('folder\\image.jpg');
+    $asset = createMockAsset(path: 'folder\\image.jpg');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
@@ -637,19 +571,7 @@ it('sanitizes backslashes in asset path', function () {
 });
 
 it('sanitizes double dots in asset path', function () {
-    $disk = Mockery::mock();
-    $disk->name = 'assets';
-
-    $container = Mockery::mock();
-    $container->shouldReceive('disk')->andReturn($disk);
-
-    $data = Mockery::mock();
-    $data->shouldReceive('has')->with('focus')->andReturn(false);
-
-    $asset = Mockery::mock(Statamic\Assets\Asset::class);
-    $asset->shouldReceive('container')->andReturn($container);
-    $asset->shouldReceive('data')->andReturn($data);
-    $asset->shouldReceive('path')->andReturn('folder/../secret/image.jpg');
+    $asset = createMockAsset(path: 'folder/../secret/image.jpg');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
@@ -657,19 +579,7 @@ it('sanitizes double dots in asset path', function () {
 });
 
 it('collapses multiple slashes in asset path', function () {
-    $disk = Mockery::mock();
-    $disk->name = 'assets';
-
-    $container = Mockery::mock();
-    $container->shouldReceive('disk')->andReturn($disk);
-
-    $data = Mockery::mock();
-    $data->shouldReceive('has')->with('focus')->andReturn(false);
-
-    $asset = Mockery::mock(Statamic\Assets\Asset::class);
-    $asset->shouldReceive('container')->andReturn($container);
-    $asset->shouldReceive('data')->andReturn($data);
-    $asset->shouldReceive('path')->andReturn('folder///image.jpg');
+    $asset = createMockAsset(path: 'folder///image.jpg');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
@@ -705,7 +615,7 @@ it('ignores zero width', function () {
 
     $url = (new ImageBossBuilder($asset))->width(0)->url();
 
-    expect($url)->toContain('width/1000'); // falls back to default
+    expect($url)->toContain('width/1000');
 });
 
 it('ignores negative width', function () {
@@ -740,7 +650,6 @@ it('ignores non-existent preset', function () {
     $srcset = $builder->srcset();
     $widths = array_column($srcset, 'width');
 
-    // Falls back to defaults from config
     expect($widths[0])->toBe(320)
         ->and(end($widths))->toBe(2560);
 });
@@ -748,20 +657,7 @@ it('ignores non-existent preset', function () {
 // Container disk name fallback
 
 it('uses container handle when disk name is null', function () {
-    $disk = Mockery::mock();
-    $disk->name = null;
-
-    $container = Mockery::mock();
-    $container->shouldReceive('disk')->andReturn($disk);
-    $container->shouldReceive('handle')->andReturn('my-handle');
-
-    $data = Mockery::mock();
-    $data->shouldReceive('has')->with('focus')->andReturn(false);
-
-    $asset = Mockery::mock(Statamic\Assets\Asset::class);
-    $asset->shouldReceive('container')->andReturn($container);
-    $asset->shouldReceive('data')->andReturn($data);
-    $asset->shouldReceive('path')->andReturn('/test.jpg');
+    $asset = createMockAsset(diskName: null, containerHandle: 'my-handle');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
