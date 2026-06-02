@@ -38,6 +38,11 @@ class NullImageBossBuilder extends ImageBossBuilder
         return $this;
     }
 
+    public function animation(?bool $animation = true): self
+    {
+        return $this;
+    }
+
     public function preset(ImagePreset|\BackedEnum|string $preset): self
     {
         return $this;

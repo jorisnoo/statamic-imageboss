@@ -84,6 +84,7 @@ return [
     | - max: Maximum width for srcset (required)
     | - ratio: Aspect ratio as width/height (optional)
     | - interval: Width step size, overrides default (optional)
+    | - animation: Preserve animation for animated GIFs (optional, true to enable)
     |
     */
 

@@ -116,6 +116,51 @@ it('calculates height from ratio', function () {
     expect($url)->toContain('cover/800x450');
 });
 
+it('includes animation:true in url when animation is enabled', function () {
+    $asset = createMockAsset();
+
+    $url = (new ImageBossBuilder($asset))->width(300)->animation()->url();
+
+    expect($url)->toContain('animation:true');
+});
+
+it('omits animation from url by default', function () {
+    $asset = createMockAsset();
+
+    $url = (new ImageBossBuilder($asset))->width(300)->url();
+
+    expect($url)->not->toContain('animation:');
+});
+
+it('omits animation from url when animation is false or null', function () {
+    $asset = createMockAsset();
+
+    $urlFalse = (new ImageBossBuilder($asset))->width(300)->animation(false)->url();
+    $urlNull = (new ImageBossBuilder($asset))->width(300)->animation(null)->url();
+
+    expect($urlFalse)->not->toContain('animation:')
+        ->and($urlNull)->not->toContain('animation:');
+});
+
+it('includes animation:true in rias url when animation is enabled', function () {
+    $asset = createMockAsset(path: '/test.jpg');
+
+    $rias = (new ImageBossBuilder($asset))->animation()->rias();
+
+    expect($rias)->toContain('animation:true')
+        ->and($rias)->toContain('width/{width}');
+});
+
+it('applies animation from preset configuration', function () {
+    config()->set('statamic.imageboss.presets.gif', ['min' => 300, 'max' => 300, 'animation' => true]);
+
+    $asset = createMockAsset();
+
+    $url = (new ImageBossBuilder($asset))->preset('gif')->width(300)->url();
+
+    expect($url)->toContain('animation:true');
+});
+
 it('includes focal point in url', function () {
     $asset = createMockAsset(true, '25-75-1');
 
@@ -485,45 +530,45 @@ it('generates glide srcset when source is not configured', function () {
 
 // Focal point edge cases
 
-it('ignores focal point when focus data is not a string', function () {
+it('defaults to center when focus data is not a string', function () {
     $asset = createMockAsset(hasFocus: true, focusValue: 123);
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
-    expect($url)->not->toContain('fp-x:')
+    expect($url)->toContain('fp-x:0.5,fp-y:0.5')
         ->and($url)->toContain('format:auto');
 });
 
-it('ignores focal point when focus string has no dash', function () {
+it('defaults to center when focus string has no dash', function () {
     $asset = createMockAsset(hasFocus: true, focusValue: 'center');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
-    expect($url)->not->toContain('fp-x:');
+    expect($url)->toContain('fp-x:0.5,fp-y:0.5');
 });
 
-it('ignores focal point with too many parts', function () {
+it('defaults to center when focus has too many parts', function () {
     $asset = createMockAsset(true, '25-75-1-extra');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
-    expect($url)->not->toContain('fp-x:');
+    expect($url)->toContain('fp-x:0.5,fp-y:0.5');
 });
 
-it('ignores focal point with non-numeric values', function () {
+it('defaults to center when focus has non-numeric values', function () {
     $asset = createMockAsset(true, 'abc-def');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
-    expect($url)->not->toContain('fp-x:');
+    expect($url)->toContain('fp-x:0.5,fp-y:0.5');
 });
 
-it('ignores focal point with out-of-range values', function () {
+it('defaults to center when focus has out-of-range values', function () {
     $asset = createMockAsset(true, '150-50-1');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
-    expect($url)->not->toContain('fp-x:');
+    expect($url)->toContain('fp-x:0.5,fp-y:0.5');
 });
 
 it('handles focal point at boundary values 0 and 100', function () {
@@ -543,7 +588,7 @@ it('generates correct bossToken signature', function () {
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
-    $path = '/test-source/width/800/format:auto/assets/test.jpg';
+    $path = '/test-source/width/800/fp-x:0.5,fp-y:0.5,format:auto/assets/test.jpg';
     $expectedToken = hash_hmac('sha256', $path, 'my-secret');
 
     expect($url)->toContain("?bossToken={$expectedToken}");

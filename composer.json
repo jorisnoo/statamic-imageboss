@@ -3,6 +3,7 @@
     "description": "ImageBoss integration for Statamic with Glide fallback",
     "keywords": [
         "statamic",
+        "statamic-addon",
         "imageboss",
         "images",
         "responsive",
@@ -19,8 +20,7 @@
         {
             "name": "Joris Noordermeer",
             "email": "contact@noordermeer.ch",
-            "homepage": "https://github.com/jorisnoo",
-            "role": "Developer"
+            "homepage": "https://github.com/jorisnoo"
         }
     ],
     "require": {

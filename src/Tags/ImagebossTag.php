@@ -12,7 +12,7 @@ class ImagebossTag extends Tags
     protected static $handle = 'imageboss';
 
     /**
-     * {{ imageboss:url src="image" width="800" }}
+     * {{ imageboss:url src="image" width="800" animation="true" }}
      */
     public function url(): string
     {
@@ -26,6 +26,7 @@ class ImagebossTag extends Tags
             ->width($this->params->int('width'))
             ->height($this->params->int('height'))
             ->ratio($this->params->float('ratio'))
+            ->animation($this->params->bool('animation'))
             ->url();
     }
 
@@ -51,6 +52,7 @@ class ImagebossTag extends Tags
             ->max($this->params->int('max'))
             ->interval($this->params->int('interval'))
             ->ratio($this->params->float('ratio'))
+            ->animation($this->params->bool('animation'))
             ->srcsetString();
     }
 

@@ -24,6 +24,8 @@ class ImageBossBuilder
 
     private ?int $interval = null;
 
+    private bool $animation = false;
+
     public function __construct(Asset $asset)
     {
         $this->asset = $asset;
@@ -95,6 +97,17 @@ class ImageBossBuilder
         return $this;
     }
 
+    public function animation(?bool $animation = true): self
+    {
+        if (! $animation) {
+            return $this;
+        }
+
+        $this->animation = true;
+
+        return $this;
+    }
+
     public function aspectRatio(): ?float
     {
         if ($this->ratio) {
@@ -141,6 +154,10 @@ class ImageBossBuilder
 
         if (isset($config['interval'])) {
             $this->interval = $config['interval'];
+        }
+
+        if (isset($config['animation'])) {
+            $this->animation = $config['animation'];
         }
 
         return $this;
@@ -222,13 +239,15 @@ class ImageBossBuilder
             $operations->push('width/{width}');
         }
 
-        $focalPoint = $this->getFocalPoint();
+        $focalPoint = $this->getFocalPoint() ?? ['x' => 0.5, 'y' => 0.5];
 
-        if ($focalPoint) {
-            $operations->push("fp-x:{$focalPoint['x']},fp-y:{$focalPoint['y']},format:auto");
-        } else {
-            $operations->push('format:auto');
+        $options = "fp-x:{$focalPoint['x']},fp-y:{$focalPoint['y']},format:auto";
+
+        if ($this->animation) {
+            $options .= ',animation:true';
         }
+
+        $operations->push($options);
 
         $operations->push(
             $this->asset->container()->disk()->name ?? $this->asset->container()->handle(),
@@ -283,13 +302,15 @@ class ImageBossBuilder
             $operations->push("width/{$width}");
         }
 
-        $focalPoint = $this->getFocalPoint();
+        $focalPoint = $this->getFocalPoint() ?? ['x' => 0.5, 'y' => 0.5];
 
-        if ($focalPoint) {
-            $operations->push("fp-x:{$focalPoint['x']},fp-y:{$focalPoint['y']},format:auto");
-        } else {
-            $operations->push('format:auto');
+        $options = "fp-x:{$focalPoint['x']},fp-y:{$focalPoint['y']},format:auto";
+
+        if ($this->animation) {
+            $options .= ',animation:true';
         }
+
+        $operations->push($options);
 
         $operations->push(
             $this->asset->container()->disk()->name ?? $this->asset->container()->handle(),

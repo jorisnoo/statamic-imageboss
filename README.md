@@ -57,6 +57,7 @@ Define presets in `config/statamic/imageboss.php`:
         'max' => 700,      // maximum srcset width
         'ratio' => 1,      // aspect ratio (optional)
         'interval' => 250, // width step (optional)
+        'animation' => true, // preserve animated GIF frames (optional)
     ],
     'hero' => [
         'min' => 640,
@@ -83,7 +84,7 @@ enum Preset: string implements ImagePreset
     case Hero = 'hero';
 
     /**
-     * @return array{min: int, max: int, ratio?: float, interval?: int}
+     * @return array{min: int, max: int, ratio?: float, interval?: int, animation?: bool}
      */
     public function config(): array
     {
@@ -117,6 +118,9 @@ use Noo\StatamicImageboss\Facades\ImageBoss;
 $url = ImageBoss::from($asset)->width(800)->url();
 $url = ImageBoss::from($asset)->width(800)->ratio(16/9)->url();
 
+// Animated GIF (by default only the first frame is processed)
+$url = ImageBoss::from($asset)->width(300)->animation()->url();
+
 // Responsive srcset with preset
 $srcset = ImageBoss::from($asset)->preset('hero')->srcsetString();
 // Or
@@ -137,6 +141,7 @@ $srcset = ImageBoss::from($asset)
 // Single URL
 {{ imageboss:url src="image" width="800" }}
 {{ imageboss:url src="image" width="800" ratio="1.777" }}
+{{ imageboss:url src="image" width="300" animation="true" }}
 
 // Responsive srcset
 {{ imageboss:srcset src="image" preset="hero" }}
@@ -164,6 +169,7 @@ Full example:
 | `min(int)` | Minimum width for srcset |
 | `max(int)` | Maximum width for srcset |
 | `interval(int)` | Width step for srcset |
+| `animation(bool)` | Preserve animation for animated GIFs. By default ImageBoss only processes the first frame. |
 | `preset(string)` | Apply preset configuration |
 | `url()` | Generate single URL |
 | `rias()` | Generate URL with `{width}` placeholder for lazysizes RIAS |
@@ -209,6 +215,8 @@ When an asset has a focal point set, it's automatically included in the URL:
 ```
 https://img.imageboss.me/your-source/cover:800x450/fp:0.25,0.75/format:auto/assets/image.jpg
 ```
+
+Assets without a focal point default to center (`fp-x:0.5,fp-y:0.5`) so cover crops stay centred instead of falling back to ImageBoss's smart-crop.
 
 ## Features
 
