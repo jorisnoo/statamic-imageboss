@@ -16,15 +16,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | ImageBoss Secret
+    | ImageBoss Token
     |--------------------------------------------------------------------------
     |
-    | Optional HMAC secret for signing ImageBoss URLs. When set, all URLs
+    | Optional HMAC token for signing ImageBoss URLs. When set, all URLs
     | will be signed using SHA-256 to prevent URL tampering.
     |
     */
 
-    'secret' => env('IMAGEBOSS_SECRET'),
+    'token' => env('IMAGEBOSS_TOKEN'),
 
     /*
     |--------------------------------------------------------------------------

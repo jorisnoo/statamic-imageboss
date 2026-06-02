@@ -331,13 +331,13 @@ class ImageBossBuilder
     private function signPath(string $path): string
     {
         $baseUrl = config('statamic.imageboss.base_url', 'https://img.imageboss.me');
-        $secret = config('statamic.imageboss.secret');
+        $token = config('statamic.imageboss.token');
 
-        if (! $secret) {
+        if (! $token) {
             return $baseUrl.$path;
         }
 
-        $bossToken = hash_hmac('sha256', $path, $secret);
+        $bossToken = hash_hmac('sha256', $path, $token);
 
         return $baseUrl.$path.'?bossToken='.$bossToken;
     }

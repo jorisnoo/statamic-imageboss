@@ -8,7 +8,7 @@ use Noo\StatamicImageboss\Tests\Fixtures\TestPreset;
 
 beforeEach(function () {
     config()->set('statamic.imageboss.source', 'test-source');
-    config()->set('statamic.imageboss.secret', null);
+    config()->set('statamic.imageboss.token', null);
     config()->set('statamic.imageboss.base_url', 'https://img.imageboss.me');
     config()->set('statamic.imageboss.default_width', 1000);
     config()->set('statamic.imageboss.width_interval', 320);
@@ -181,8 +181,8 @@ it('includes focal point from two-part format in url', function () {
     expect($url)->toContain('fp-x:0.3,fp-y:0.8');
 });
 
-it('signs url when secret is configured', function () {
-    config()->set('statamic.imageboss.secret', 'test-secret');
+it('signs url when token is configured', function () {
+    config()->set('statamic.imageboss.token', 'test-token');
 
     $asset = createMockAsset();
 
@@ -582,20 +582,20 @@ it('handles focal point at boundary values 0 and 100', function () {
 // URL signing verification
 
 it('generates correct bossToken signature', function () {
-    config()->set('statamic.imageboss.secret', 'my-secret');
+    config()->set('statamic.imageboss.token', 'my-token');
 
     $asset = createMockAsset();
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
     $path = '/test-source/width/800/fp-x:0.5,fp-y:0.5,format:auto/assets/test.jpg';
-    $expectedToken = hash_hmac('sha256', $path, 'my-secret');
+    $expectedToken = hash_hmac('sha256', $path, 'my-token');
 
     expect($url)->toContain("?bossToken={$expectedToken}");
 });
 
-it('does not append bossToken when secret is null', function () {
-    config()->set('statamic.imageboss.secret', null);
+it('does not append bossToken when token is null', function () {
+    config()->set('statamic.imageboss.token', null);
 
     $asset = createMockAsset();
 

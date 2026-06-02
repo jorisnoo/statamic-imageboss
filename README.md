@@ -26,7 +26,7 @@ Set your ImageBoss credentials in `.env`:
 
 ```env
 IMAGEBOSS_SOURCE=your-source
-IMAGEBOSS_SECRET=your-secret  # optional, for URL signing
+IMAGEBOSS_TOKEN=your-token  # optional, for URL signing
 ```
 
 When `IMAGEBOSS_SOURCE` is not set, the package falls back to Statamic's Glide.
@@ -36,7 +36,7 @@ When `IMAGEBOSS_SOURCE` is not set, the package falls back to Statamic's Glide.
 | Option | Default | Description |
 |--------|---------|-------------|
 | `source` | `null` | ImageBoss source identifier |
-| `secret` | `null` | HMAC secret for URL signing |
+| `token` | `null` | HMAC token for URL signing |
 | `base_url` | `https://img.imageboss.me` | ImageBoss CDN base URL |
 | `default_width` | `1000` | Default width for `url()` |
 | `width_interval` | `200` | Step size for srcset generation |
