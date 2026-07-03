@@ -21,12 +21,10 @@ jobs:
       fail-fast: true
       matrix:
         php: [8.4, 8.3]
-        laravel: [12.*, 11.*]
+        laravel: [12.*]
         include:
           - laravel: 12.*
             testbench: 10.*
-          - laravel: 11.*
-            testbench: 9.*
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }}
 
@@ -47,7 +45,7 @@ jobs:
           echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Install dependencies
-        run: composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --prefer-stable --prefer-dist --no-interaction
+        run: composer require --dev "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --prefer-stable --prefer-dist --no-interaction
 
       - name: List Installed Dependencies
         run: composer show -D
