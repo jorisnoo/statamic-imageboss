@@ -12,7 +12,7 @@ class PurgeAssetFromImageBoss
         $source = config('statamic.imageboss.source');
         $baseUrl = config('statamic.imageboss.base_url', 'https://img.imageboss.me');
 
-        $diskName = $event->asset->container()->disk()->name
+        $diskName = $event->asset->container()->diskHandle()
             ?? $event->asset->container()->handle();
 
         $path = $this->sanitizePath($event->asset->path());

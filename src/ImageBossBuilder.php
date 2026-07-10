@@ -250,7 +250,7 @@ class ImageBossBuilder
         $operations->push($options);
 
         $operations->push(
-            $this->asset->container()->disk()->name ?? $this->asset->container()->handle(),
+            $this->asset->container()->diskHandle() ?? $this->asset->container()->handle(),
             $this->sanitizePath($this->asset->path()),
         );
 
@@ -313,7 +313,7 @@ class ImageBossBuilder
         $operations->push($options);
 
         $operations->push(
-            $this->asset->container()->disk()->name ?? $this->asset->container()->handle(),
+            $this->asset->container()->diskHandle() ?? $this->asset->container()->handle(),
             $this->sanitizePath($this->asset->path()),
         );
 

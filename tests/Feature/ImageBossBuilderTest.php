@@ -702,9 +702,22 @@ it('ignores non-existent preset', function () {
 // Container disk name fallback
 
 it('uses container handle when disk name is null', function () {
-    $asset = createMockAsset(diskName: null, containerHandle: 'my-handle');
+    $asset = createMockAsset(diskHandle: null, containerHandle: 'my-handle');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
     expect($url)->toContain('my-handle');
+});
+
+it('uses the disk handle when it differs from the container handle', function () {
+    $asset = createMockAsset(
+        path: '/photo.jpg',
+        diskHandle: 'assets',
+        containerHandle: 'images',
+    );
+
+    $builder = (new ImageBossBuilder($asset))->width(800);
+
+    expect($builder->url())->toContain('/assets/photo.jpg')
+        ->and($builder->rias())->toContain('/assets/photo.jpg');
 });

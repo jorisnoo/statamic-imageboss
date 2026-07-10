@@ -14,7 +14,11 @@ beforeEach(function () {
 });
 
 it('dispatches purge job when asset is reuploaded', function () {
-    $asset = createMockAsset(path: '/images/photo.jpg');
+    $asset = createMockAsset(
+        path: '/images/photo.jpg',
+        diskHandle: 'assets',
+        containerHandle: 'images',
+    );
 
     $listener = new PurgeAssetFromImageBoss;
     $listener->handle(new AssetReuploaded($asset, 'photo.jpg'));
@@ -25,7 +29,7 @@ it('dispatches purge job when asset is reuploaded', function () {
 });
 
 it('uses container handle when disk name is null', function () {
-    $asset = createMockAsset(path: '/photo.jpg', diskName: null, containerHandle: 'uploads');
+    $asset = createMockAsset(path: '/photo.jpg', diskHandle: null, containerHandle: 'uploads');
 
     $listener = new PurgeAssetFromImageBoss;
     $listener->handle(new AssetReuploaded($asset, 'photo.jpg'));

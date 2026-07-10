@@ -10,14 +10,11 @@ function createMockAsset(
     ?int $width = null,
     ?int $height = null,
     string $path = '/test.jpg',
-    ?string $diskName = 'assets',
+    ?string $diskHandle = 'assets',
     string $containerHandle = 'assets',
 ): Mockery\MockInterface {
-    $disk = Mockery::mock();
-    $disk->name = $diskName;
-
     $container = Mockery::mock();
-    $container->shouldReceive('disk')->andReturn($disk);
+    $container->shouldReceive('diskHandle')->andReturn($diskHandle);
     $container->shouldReceive('handle')->andReturn($containerHandle);
 
     $data = Mockery::mock();
