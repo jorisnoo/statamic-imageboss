@@ -2,6 +2,35 @@
 
 All notable changes to `statamic-imageboss` will be documented in this file.
 
+## [0.4.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.4.0) (2026-07-10)
+
+### Features
+
+- add animation support and default focal points to center ([cec6bb7](https://github.com/jorisnoo/statamic-imageboss/commit/cec6bb74d54c22123fef96c06f1d50a3dcf76a5d))
+- add automatic imageboss cache purging on asset reupload ([bc6ed95](https://github.com/jorisnoo/statamic-imageboss/commit/bc6ed95df8f27fd9e866bd70dc2402e44a1052c8))
+
+### Code Refactoring
+
+- rename secret to token for ImageBoss URL signing ([09955ac](https://github.com/jorisnoo/statamic-imageboss/commit/09955ac9e3d927308242f43b626e6d8bac5a7eb9))
+
+### Documentation
+
+- update requirements to php 8.3+ and statamic 5-6 ([01e89da](https://github.com/jorisnoo/statamic-imageboss/commit/01e89da4ab1685301d235c3b798b1221657147e9))
+
+### Tests
+
+- refactor ImageBossBuilder tests with extracted mock helpers ([24dc514](https://github.com/jorisnoo/statamic-imageboss/commit/24dc51492a763f7a18e4b9c2cbdc084bdccdb715))
+- expand ImageBossBuilder test suite and upgrade Pest to v4 ([c2fcfca](https://github.com/jorisnoo/statamic-imageboss/commit/c2fcfca8807284e122a37c266f2a795ef632baad))
+
+### Build System
+
+- **deps:** bump actions/checkout from 6 to 7 ([95546f6](https://github.com/jorisnoo/statamic-imageboss/commit/95546f640f12be196ef2d99e9c351fa34439e58e))
+
+### Chores
+
+- drop Laravel 11 support, require Laravel 12 minimum ([9fce458](https://github.com/jorisnoo/statamic-imageboss/commit/9fce458a144771446448a0332a738c5151ce35cf))
+- simplify dependabot auto-merge workflow ([0f3c2f8](https://github.com/jorisnoo/statamic-imageboss/commit/0f3c2f883aae56a39d2d7ba48879ddde65b7d606))
+- drop php 8.2 support ([6627c87](https://github.com/jorisnoo/statamic-imageboss/commit/6627c87f4d18a5bfc80738e3ef88f3c84457918e))
 ## [0.3.2](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.2) (2026-03-31)
 
 ### Chores
