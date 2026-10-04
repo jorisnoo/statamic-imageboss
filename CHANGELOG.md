@@ -2,7 +2,7 @@
 
 All notable changes to `statamic-imageboss` will be documented in this file.
 
-## [0.4.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.4.0) (2026-07-10)
+## [0.4.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/0.4.0) (2026-07-10)
 
 ### Features
 
@@ -31,12 +31,12 @@ All notable changes to `statamic-imageboss` will be documented in this file.
 - drop Laravel 11 support, require Laravel 12 minimum ([9fce458](https://github.com/jorisnoo/statamic-imageboss/commit/9fce458a144771446448a0332a738c5151ce35cf))
 - simplify dependabot auto-merge workflow ([0f3c2f8](https://github.com/jorisnoo/statamic-imageboss/commit/0f3c2f883aae56a39d2d7ba48879ddde65b7d606))
 - drop php 8.2 support ([6627c87](https://github.com/jorisnoo/statamic-imageboss/commit/6627c87f4d18a5bfc80738e3ef88f3c84457918e))
-## [0.3.2](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.2) (2026-03-31)
+## [0.3.2](https://github.com/jorisnoo/statamic-imageboss/releases/tag/0.3.2) (2026-03-31)
 
 ### Chores
 
 - remove workflows and update dependencies ([0e85ee2](https://github.com/jorisnoo/statamic-imageboss/commit/0e85ee2c17123e2674a6f9e5343810fe4282b0c0))
-## [0.3.1](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.1) (2026-02-24)
+## [0.3.1](https://github.com/jorisnoo/statamic-imageboss/releases/tag/0.3.1) (2026-02-24)
 
 ### Features
 
@@ -49,12 +49,12 @@ All notable changes to `statamic-imageboss` will be documented in this file.
 - support three-part focal point format in focus string validation ([69513fc](https://github.com/jorisnoo/statamic-imageboss/commit/69513fc1192c56910fd02efd79e2034b4251501f))
 - add crop_focal fit when height is specified in image manipulation ([2e75b89](https://github.com/jorisnoo/statamic-imageboss/commit/2e75b89b3740235843da24f873ec39925cca34bd))
 - update publish tag and config path references in README and service provider ([b1ac9f8](https://github.com/jorisnoo/statamic-imageboss/commit/b1ac9f89cde125be592cc8e8dee9a810b8a5630b))
-## [0.3.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.3.0) (2026-02-13)
+## [0.3.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/0.3.0) (2026-02-13)
 
 ### Code Refactoring
 
 - move config to statamic namespace (statamic.imageboss) ([48c783f](https://github.com/jorisnoo/statamic-imageboss/commit/48c783fd0fe8cf71b00935bafafa832d133aa1a9))
-## [0.2.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.2.0) (2026-02-11)
+## [0.2.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/0.2.0) (2026-02-11)
 
 ### Bug Fixes
 
@@ -69,7 +69,7 @@ All notable changes to `statamic-imageboss` will be documented in this file.
 
 - allow statamic 6 ([c96319a](https://github.com/jorisnoo/statamic-imageboss/commit/c96319aa9f2e92f8f6f442352c6c12941e7637a1))
 - add support URLs and author homepage for Packagist ([a445bfa](https://github.com/jorisnoo/statamic-imageboss/commit/a445bfa5629c42c84884443aa3f54f2b0f419c90))
-## [0.1.1](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.1.1) (2026-01-21)
+## [0.1.1](https://github.com/jorisnoo/statamic-imageboss/releases/tag/0.1.1) (2026-01-21)
 
 ### Features
 
@@ -78,7 +78,7 @@ All notable changes to `statamic-imageboss` will be documented in this file.
 ### Build System
 
 - link to changelog in releases ([9c15e23](https://github.com/jorisnoo/statamic-imageboss/commit/9c15e23512ec746b2bff966e3eb6e7b81ddb55d3))
-## [0.1.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/v0.1.0) (2026-01-21)
+## [0.1.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/0.1.0) (2026-01-21)
 
 ### Features
 

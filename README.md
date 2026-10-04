@@ -228,3 +228,7 @@ Assets without a focal point default to center (`fp-x:0.5,fp-y:0.5`) so cover cr
 ## License
 
 MIT
+
+## Maintainer releases
+
+See [RELEASING.md](RELEASING.md) for versioning, changelog entries and the release command.
