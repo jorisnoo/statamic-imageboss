@@ -265,7 +265,10 @@ class ImageBossBuilder
             return '';
         }
 
-        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='{$width}' height='{$height}'%3E%3C/svg%3E";
+        // Fully encoded: unencoded spaces would split the URI into bogus srcset candidates.
+        return 'data:image/svg+xml;charset=utf-8,'.rawurlencode(
+            "<svg xmlns='http://www.w3.org/2000/svg' width='{$width}' height='{$height}'/>"
+        );
     }
 
     /**

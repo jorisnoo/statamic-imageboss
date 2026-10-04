@@ -401,7 +401,7 @@ it('generates placeholder with explicit width and height', function () {
 
     $placeholder = (new ImageBossBuilder($asset))->width(800)->height(600)->placeholder();
 
-    expect($placeholder)->toBe("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3C/svg%3E");
+    expect($placeholder)->toBe('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27800%27%20height%3D%27600%27%2F%3E');
 });
 
 it('generates placeholder with width and ratio', function () {
@@ -409,7 +409,7 @@ it('generates placeholder with width and ratio', function () {
 
     $placeholder = (new ImageBossBuilder($asset))->width(800)->ratio(16 / 9)->placeholder();
 
-    expect($placeholder)->toBe("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3C/svg%3E");
+    expect($placeholder)->toBe('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27800%27%20height%3D%27450%27%2F%3E');
 });
 
 it('generates placeholder from asset native dimensions', function () {
@@ -417,7 +417,7 @@ it('generates placeholder from asset native dimensions', function () {
 
     $placeholder = (new ImageBossBuilder($asset))->placeholder();
 
-    expect($placeholder)->toBe("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3C/svg%3E");
+    expect($placeholder)->toBe('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271920%27%20height%3D%271080%27%2F%3E');
 });
 
 it('returns empty string for placeholder when dimensions are unresolvable', function () {
@@ -441,7 +441,17 @@ it('generates placeholder starting with data uri prefix', function () {
 
     $placeholder = (new ImageBossBuilder($asset))->placeholder();
 
-    expect($placeholder)->toStartWith('data:image/svg+xml,');
+    expect($placeholder)->toStartWith('data:image/svg+xml;charset=utf-8,');
+});
+
+it('generates a placeholder free of whitespace so it survives in a srcset', function () {
+    $asset = createMockAsset(width: 400, height: 300);
+
+    $placeholder = (new ImageBossBuilder($asset))->placeholder();
+
+    // srcset splits candidates on whitespace, so a single space here would make the
+    // whole candidate list unparseable and send the browser back to the src.
+    expect($placeholder)->not->toMatch('/\s/');
 });
 
 // RIAS URL generation
