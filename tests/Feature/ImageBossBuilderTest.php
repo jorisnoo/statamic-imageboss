@@ -5,6 +5,8 @@ use Noo\StatamicImageboss\ImageBossBuilder;
 use Noo\StatamicImageboss\NullImageBossBuilder;
 use Noo\StatamicImageboss\Tests\Fixtures\InterfacePreset;
 use Noo\StatamicImageboss\Tests\Fixtures\TestPreset;
+use Statamic\Facades\URL;
+use Statamic\Fields\Value;
 
 beforeEach(function () {
     config()->set('statamic.imageboss.source', 'test-source');
@@ -367,7 +369,7 @@ it('returns NullImageBossBuilder from factory when asset is null', function () {
 });
 
 it('returns NullImageBossBuilder from factory when Value unwraps to null', function () {
-    $value = Mockery::mock(\Statamic\Fields\Value::class);
+    $value = Mockery::mock(Value::class);
     $value->shouldReceive('value')->andReturn(null);
 
     $imageBoss = new ImageBoss;
@@ -495,7 +497,7 @@ it('falls back to regular url for rias when source is not configured', function 
     $asset = createMockAsset();
 
     createGlideMock();
-    Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=1000');
+    URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=1000');
 
     $rias = (new ImageBossBuilder($asset))->rias();
 
@@ -508,7 +510,7 @@ it('falls back to glide url when source is not configured', function () {
     $asset = createMockAsset();
 
     createGlideMock();
-    Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=800');
+    URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=800');
 
     $url = (new ImageBossBuilder($asset))->width(800)->url();
 
@@ -519,7 +521,7 @@ it('falls back to glide url with crop_focal when height is set', function () {
     $asset = createMockAsset();
 
     createGlideMock(['height' => null, 'fit' => 'crop_focal']);
-    Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=800&h=600');
+    URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg?w=800&h=600');
 
     $url = (new ImageBossBuilder($asset))->width(800)->height(600)->url();
 
@@ -530,7 +532,7 @@ it('generates glide srcset when source is not configured', function () {
     $asset = createMockAsset();
 
     createGlideMock();
-    Statamic\Facades\URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg');
+    URL::shouldReceive('makeAbsolute')->andReturn('http://localhost/glide/test.jpg');
 
     $srcset = (new ImageBossBuilder($asset))->min(300)->max(500)->interval(200)->srcset();
     $widths = array_column($srcset, 'width');
@@ -648,12 +650,12 @@ it('throws InvalidArgumentException for non-asset input', function () {
     $imageBoss = new ImageBoss;
 
     $imageBoss->from('not-an-asset');
-})->throws(\InvalidArgumentException::class);
+})->throws(InvalidArgumentException::class);
 
 it('unwraps Value objects before checking asset type', function () {
     $asset = createMockAsset();
 
-    $value = Mockery::mock(\Statamic\Fields\Value::class);
+    $value = Mockery::mock(Value::class);
     $value->shouldReceive('value')->andReturn($asset);
 
     $imageBoss = new ImageBoss;

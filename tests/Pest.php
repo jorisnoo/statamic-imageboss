@@ -1,6 +1,9 @@
 <?php
 
+use Mockery\MockInterface;
 use Noo\StatamicImageboss\Tests\TestCase;
+use Statamic\Assets\Asset;
+use Statamic\Facades\Image;
 
 uses(TestCase::class)->in('Feature');
 
@@ -12,7 +15,7 @@ function createMockAsset(
     string $path = '/test.jpg',
     ?string $diskHandle = 'assets',
     string $containerHandle = 'assets',
-): Mockery\MockInterface {
+): MockInterface {
     $container = Mockery::mock();
     $container->shouldReceive('diskHandle')->andReturn($diskHandle);
     $container->shouldReceive('handle')->andReturn($containerHandle);
@@ -24,7 +27,7 @@ function createMockAsset(
         $data->shouldReceive('get')->with('focus')->andReturn($focusValue);
     }
 
-    $asset = Mockery::mock(Statamic\Assets\Asset::class);
+    $asset = Mockery::mock(Asset::class);
     $asset->shouldReceive('container')->andReturn($container);
     $asset->shouldReceive('data')->andReturn($data);
     $asset->shouldReceive('path')->andReturn($path);
@@ -40,7 +43,7 @@ function createMockAsset(
     return $asset;
 }
 
-function createGlideMock(array $extraMethods = []): Mockery\MockInterface
+function createGlideMock(array $extraMethods = []): MockInterface
 {
     config()->set('statamic.imageboss.source', null);
 
@@ -58,7 +61,7 @@ function createGlideMock(array $extraMethods = []): Mockery\MockInterface
         $expectation->andReturn($manipulation);
     }
 
-    Statamic\Facades\Image::shouldReceive('manipulate')->andReturn($manipulation);
+    Image::shouldReceive('manipulate')->andReturn($manipulation);
 
     return $manipulation;
 }
