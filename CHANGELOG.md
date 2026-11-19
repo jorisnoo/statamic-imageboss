@@ -2,6 +2,20 @@
 
 All notable changes to `statamic-imageboss` will be documented in this file.
 
+## [0.5.0] - 2026-11-19
+
+### Added
+
+- Configure `path_prefixes` per container for web-proxy and bucket origins. Unlisted containers retain their existing disk-handle prefix.
+- Cache purging covers uploads, deletions, moves and renames as well as reuploads. Queue workers retry failed requests with backoff.
+
+### Fixed
+
+- Register the ImageBoss Antlers tag and accept multi-asset fields.
+- Encode asset path segments before signing and preserve literal dots inside filenames.
+- Keep crop focus precision, honor height-only URLs and reserve the correct crop ratio in srcset-safe SVG placeholders.
+- Ignore non-positive preset or default dimensions and intervals, and reject excessive srcset ranges.
+
 ## [0.4.0](https://github.com/jorisnoo/statamic-imageboss/releases/tag/0.4.0) (2026-07-10)
 
 ### Features

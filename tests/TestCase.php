@@ -7,6 +7,8 @@ use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
+    protected $enablesPackageDiscoveries = true;
+
     protected function getPackageProviders($app)
     {
         return [
@@ -16,6 +18,7 @@ class TestCase extends Orchestra
 
     protected function getEnvironmentSetUp($app): void
     {
+        $app['config']->set('cache.default', 'array');
         $app['config']->set('statamic.imageboss.source', null);
         $app['config']->set('statamic.imageboss.token', null);
         $app['config']->set('statamic.imageboss.base_url', 'https://img.imageboss.me');

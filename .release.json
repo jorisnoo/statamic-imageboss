@@ -3,6 +3,9 @@
   "sign_tag": true,
   "version_files": [],
   "checks": [
+    ["composer", "validate", "--strict"],
+    ["composer", "audit", "--locked"],
+    ["vendor/bin/pint", "--test"],
     [
       "composer",
       "test"

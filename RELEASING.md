@@ -11,6 +11,9 @@ Release from `main` using an explicit version without a `v` prefix. `CHANGELOG.m
 Configured release checks:
 
 ```sh
+composer validate --strict
+composer audit --locked
+vendor/bin/pint --test
 composer test
 ```
 

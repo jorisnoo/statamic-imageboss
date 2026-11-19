@@ -9,11 +9,16 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class PurgeImageBossCacheJob implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 4;
+
+    public array $backoff = [10, 30, 90];
+
+    public int $uniqueFor = 600;
 
     public function __construct(
         public readonly string $url
@@ -30,12 +35,8 @@ class PurgeImageBossCacheJob implements ShouldBeUnique, ShouldQueue
             'imageboss-api-key' => config('statamic.imageboss.api_key'),
         ])->delete($this->url);
 
-        if ($response->failed()) {
-            Log::error('ImageBoss cache purge failed', [
-                'url' => $this->url,
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
+        if (! $response->notFound()) {
+            $response->throw();
         }
     }
 }

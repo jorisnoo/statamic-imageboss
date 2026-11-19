@@ -5,8 +5,7 @@
 ## Requirements
 
 - PHP 8.3+
-- Laravel 12+
-- Statamic 5 or 6
+- Laravel 12 with Statamic 5.73+ or 6; Laravel 13 with Statamic 6
 
 ## Installation
 
@@ -27,6 +26,7 @@ Set your ImageBoss credentials in `.env`:
 ```env
 IMAGEBOSS_SOURCE=your-source
 IMAGEBOSS_TOKEN=your-token  # optional, for URL signing
+IMAGEBOSS_API_KEY=your-api-key  # optional, for cache purging
 ```
 
 When `IMAGEBOSS_SOURCE` is not set, the package falls back to Statamic's Glide.
@@ -37,10 +37,25 @@ When `IMAGEBOSS_SOURCE` is not set, the package falls back to Statamic's Glide.
 |--------|---------|-------------|
 | `source` | `null` | ImageBoss source identifier |
 | `token` | `null` | HMAC token for URL signing |
+| `api_key` | `null` | API key for invalidating cached images |
+| `path_prefixes` | `[]` | Origin-relative path prefix by Statamic container handle |
 | `base_url` | `https://img.imageboss.me` | ImageBoss CDN base URL |
 | `default_width` | `1000` | Default width for `url()` |
 | `width_interval` | `200` | Step size for srcset generation |
 | `presets` | see config | Named preset configurations |
+
+### Origin paths and cache purging
+
+By default the disk handle is the first path segment on the ImageBoss origin.
+If a container named `photos` uses the `public` disk served under `/storage`,
+set `'path_prefixes' => ['photos' => 'storage']` in `config/statamic/imageboss.php`.
+Use `''` instead for a bucket rooted at the asset directory. Supply unencoded
+paths; URLs, signatures and purge requests use the same encoded segments.
+
+When both `source` and `api_key` are configured, uploads, reuploads and deletes
+queue a purge. Moving or renaming an asset purges its old and new paths.
+Metadata-only saves do not purge. Use a queue worker for up to four attempts
+with backoff; a 404 means there is nothing to purge.
 
 ### Presets
 
@@ -146,7 +161,13 @@ $srcset = ImageBoss::from($asset)
 // Responsive srcset
 {{ imageboss:srcset src="image" preset="hero" }}
 {{ imageboss:srcset src="image" min="300" max="1200" interval="150" }}
+
+// SVG data URI reserving space for the final crop
+{{ imageboss:placeholder src="image" width="800" ratio="1.777" }}
 ```
+
+Use `:src="gallery"` to use the first asset in a multi-asset field. An empty
+field produces an empty string.
 
 Full example:
 
@@ -175,13 +196,14 @@ Full example:
 | `rias()` | Generate URL with `{width}` placeholder for lazysizes RIAS |
 | `srcset()` | Generate srcset array |
 | `srcsetString()` | Generate srcset string |
+| `placeholder()` | Generate a srcset-safe SVG data URI using explicit dimensions, crop ratio or native dimensions |
 
 ### Example Output
 
 `url()` returns a single URL:
 
 ```
-https://img.imageboss.me/your-source/width/800/format:auto/assets/image.jpg
+https://img.imageboss.me/your-source/width/800/fp-x:0.5,fp-y:0.5,format:auto/assets/image.jpg
 ```
 
 `srcsetString()` returns a comma-separated srcset string:
@@ -195,15 +217,15 @@ https://img.imageboss.me/.../width/640/... 640w, https://img.imageboss.me/.../wi
 ```php
 // Width only - no aspect ratio constraint
 ImageBoss::from($asset)->rias();
-// => https://img.imageboss.me/your-source/width/{width}/format:auto/assets/image.jpg
+// => https://img.imageboss.me/your-source/width/{width}/fp-x:0.5,fp-y:0.5,format:auto/assets/image.jpg
 
 // With height - maintains aspect ratio via {height} placeholder
 ImageBoss::from($asset)->height(630)->rias();
-// => https://img.imageboss.me/your-source/cover/{width}x{height}/format:auto/assets/image.jpg
+// => https://img.imageboss.me/your-source/cover/{width}x{height}/fp-x:0.5,fp-y:0.5,format:auto/assets/image.jpg
 
 // With ratio - same result, height calculated by lazysizes
 ImageBoss::from($asset)->ratio(16/9)->rias();
-// => https://img.imageboss.me/your-source/cover/{width}x{height}/format:auto/assets/image.jpg
+// => https://img.imageboss.me/your-source/cover/{width}x{height}/fp-x:0.5,fp-y:0.5,format:auto/assets/image.jpg
 ```
 
 Lazysizes replaces `{width}` with the calculated width and `{height}` based on the `--ls-aspectratio` CSS variable.
@@ -213,7 +235,7 @@ Lazysizes replaces `{width}` with the calculated width and `{height}` based on t
 When an asset has a focal point set, it's automatically included in the URL:
 
 ```
-https://img.imageboss.me/your-source/cover:800x450/fp:0.25,0.75/format:auto/assets/image.jpg
+https://img.imageboss.me/your-source/cover/800x450/fp-x:0.25,fp-y:0.75,format:auto/assets/image.jpg
 ```
 
 Assets without a focal point default to center (`fp-x:0.5,fp-y:0.5`) so cover crops stay centred instead of falling back to ImageBoss's smart-crop.

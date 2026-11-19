@@ -7,8 +7,10 @@ use Noo\StatamicImageboss\Listeners\PurgeAssetFromImageBoss;
 use Noo\StatamicImageboss\Tags\ImagebossTag;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Statamic\Events\AssetDeleted;
 use Statamic\Events\AssetReuploaded;
-use Statamic\Statamic;
+use Statamic\Events\AssetSaved;
+use Statamic\Events\AssetUploaded;
 
 class StatamicImagebossServiceProvider extends PackageServiceProvider
 {
@@ -32,10 +34,10 @@ class StatamicImagebossServiceProvider extends PackageServiceProvider
             ], 'imageboss-config');
         }
 
-        Statamic::tag('imageboss', ImagebossTag::class);
+        ImagebossTag::register();
 
-        if (filled(config('statamic.imageboss.api_key'))) {
-            Event::listen(AssetReuploaded::class, PurgeAssetFromImageBoss::class);
+        if (filled(config('statamic.imageboss.source')) && filled(config('statamic.imageboss.api_key'))) {
+            Event::listen([AssetUploaded::class, AssetReuploaded::class, AssetDeleted::class, AssetSaved::class], PurgeAssetFromImageBoss::class);
         }
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Noo\StatamicImageboss\Jobs\PurgeImageBossCacheJob;
 
 beforeEach(function () {
@@ -21,26 +21,23 @@ it('sends delete request with api key header', function () {
     });
 });
 
-it('logs error on failed request', function () {
-    Http::fake(['*' => Http::response('Not Found', 404)]);
-    Log::shouldReceive('error')
-        ->once()
-        ->with('ImageBoss cache purge failed', Mockery::on(function ($context) {
-            return $context['url'] === 'https://img.imageboss.me/test-source/assets/photo.jpg'
-                && $context['status'] === 404;
-        }));
+it('accepts an already absent origin path', function () {
+    Http::fake(['*' => Http::response('', 404)]);
 
     $job = new PurgeImageBossCacheJob('https://img.imageboss.me/test-source/assets/photo.jpg');
     $job->handle();
+    Http::assertSentCount(1);
 });
 
-it('does not log on successful request', function () {
-    Http::fake(['*' => Http::response('', 200)]);
-    Log::shouldReceive('error')->never();
-
+it('exposes failed purges to the queue worker with bounded retries and a finite lock', function (int $status) {
+    Http::fake(['*' => Http::response('', $status)]);
     $job = new PurgeImageBossCacheJob('https://img.imageboss.me/test-source/assets/photo.jpg');
-    $job->handle();
-});
+
+    expect($job->tries)->toBe(4)
+        ->and($job->backoff)->toBe([10, 30, 90])
+        ->and($job->uniqueFor)->toBe(600)
+        ->and(fn () => $job->handle())->toThrow(RequestException::class);
+})->with([403, 429, 503]);
 
 it('uses url as unique id', function () {
     $job = new PurgeImageBossCacheJob('https://img.imageboss.me/test-source/assets/photo.jpg');

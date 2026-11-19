@@ -14,6 +14,10 @@ return [
 
     'source' => env('IMAGEBOSS_SOURCE'),
 
+    // Origin-relative path by Statamic container; '' means the origin root.
+    // Unlisted containers retain the disk handle as their prefix.
+    'path_prefixes' => [],
+
     /*
     |--------------------------------------------------------------------------
     | ImageBoss Token
@@ -31,8 +35,8 @@ return [
     | ImageBoss API Key
     |--------------------------------------------------------------------------
     |
-    | API key for cache purging. When set, the package will automatically
-    | purge ImageBoss cache when assets are reuploaded in Statamic.
+    | With a source and API key, uploads, reuploads, moves, renames and
+    | deletions invalidate the corresponding cached ImageBoss variants.
     |
     */
 

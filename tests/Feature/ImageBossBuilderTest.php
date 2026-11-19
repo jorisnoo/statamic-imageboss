@@ -170,7 +170,7 @@ it('includes focal point in url', function () {
 
     $url = $builder->url();
 
-    expect($url)->toContain('fp-x:0.3,fp-y:0.8');
+    expect($url)->toContain('fp-x:0.25,fp-y:0.75');
 });
 
 it('includes focal point from two-part format in url', function () {
@@ -180,7 +180,7 @@ it('includes focal point from two-part format in url', function () {
 
     $url = $builder->url();
 
-    expect($url)->toContain('fp-x:0.3,fp-y:0.8');
+    expect($url)->toContain('fp-x:0.25,fp-y:0.75');
 });
 
 it('signs url when token is configured', function () {
@@ -732,4 +732,40 @@ it('uses the disk handle when it differs from the container handle', function ()
 
     expect($builder->url())->toContain('/assets/photo.jpg')
         ->and($builder->rias())->toContain('/assets/photo.jpg');
+});
+
+it('uses valid defaults when preset and configured widths are not positive', function () {
+    config([
+        'statamic.imageboss.presets.invalid' => ['min' => 0, 'max' => -1, 'ratio' => -1, 'interval' => 0],
+        'statamic.imageboss.presets.default' => ['min' => 0, 'max' => 525],
+        'statamic.imageboss.width_interval' => 0,
+    ]);
+
+    $candidates = (new ImageBossBuilder(createMockAsset()))->preset('invalid')->srcset();
+
+    expect(array_column($candidates, 'width'))->toBe([320, 520, 525])
+        ->and($candidates[0]['url'])->toContain('/width/320/');
+});
+
+it('rejects an excessive candidate count before constructing the srcset', function () {
+    (new ImageBossBuilder(createMockAsset()))->min(1)->max(2000)->interval(1)->srcset();
+})->throws(InvalidArgumentException::class, 'Srcset exceeds');
+
+it('uses preset ratio for a placeholder without explicit dimensions', function () {
+    $builder = (new ImageBossBuilder(createMockAsset(width: 1200, height: 600)))->preset('card');
+
+    expect(rawurldecode($builder->placeholder()))->toContain("width='1200' height='1500'");
+});
+
+it('keeps a requested height with the default width', function () {
+    expect((new ImageBossBuilder(createMockAsset()))->height(600)->url())->toContain('/cover/1000x600/');
+});
+
+it('signs the encoded origin path and supports bucket-root sources', function () {
+    config(['statamic.imageboss.path_prefixes' => ['assets' => ''], 'statamic.imageboss.token' => 'test-token']);
+    $builder = new ImageBossBuilder(createMockAsset(path: 'photos/my photo..final #1.jpg'));
+    $path = '/test-source/width/1000/fp-x:0.5,fp-y:0.5,format:auto/photos/my%20photo..final%20%231.jpg';
+
+    expect($builder->url())->toBe('https://img.imageboss.me'.$path.'?bossToken='.hash_hmac('sha256', $path, 'test-token'))
+        ->and($builder->rias())->toEndWith('/photos/my%20photo..final%20%231.jpg');
 });

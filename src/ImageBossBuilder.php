@@ -136,25 +136,10 @@ class ImageBossBuilder
             $config = config("statamic.imageboss.presets.{$presetName}", []);
         }
 
-        if (empty($config)) {
-            return $this;
-        }
-
-        if (isset($config['min'])) {
-            $this->min = $config['min'];
-        }
-
-        if (isset($config['max'])) {
-            $this->max = $config['max'];
-        }
-
-        if (isset($config['ratio'])) {
-            $this->ratio = $config['ratio'];
-        }
-
-        if (isset($config['interval'])) {
-            $this->interval = $config['interval'];
-        }
+        $this->min($config['min'] ?? null)
+            ->max($config['max'] ?? null)
+            ->ratio($config['ratio'] ?? null)
+            ->interval($config['interval'] ?? null);
 
         if (isset($config['animation'])) {
             $this->animation = $config['animation'];
@@ -165,8 +150,8 @@ class ImageBossBuilder
 
     public function url(): string
     {
-        $width = $this->width ?? config('statamic.imageboss.default_width', 1000);
-        $height = $this->calculateHeight($width);
+        $width = $this->width ?? $this->configuredWidth('default_width', 1000);
+        $height = $this->calculateHeight($width) ?? $this->height;
 
         $source = config('statamic.imageboss.source');
 
@@ -231,30 +216,7 @@ class ImageBossBuilder
         $baseUrl = config('statamic.imageboss.base_url', 'https://img.imageboss.me');
         $height = ($this->height || $this->ratio) ? '{height}' : null;
 
-        $operations = collect(['', $source]);
-
-        if ($height) {
-            $operations->push("cover/{width}x{$height}");
-        } else {
-            $operations->push('width/{width}');
-        }
-
-        $focalPoint = $this->getFocalPoint() ?? ['x' => 0.5, 'y' => 0.5];
-
-        $options = "fp-x:{$focalPoint['x']},fp-y:{$focalPoint['y']},format:auto";
-
-        if ($this->animation) {
-            $options .= ',animation:true';
-        }
-
-        $operations->push($options);
-
-        $operations->push(
-            $this->asset->container()->diskHandle() ?? $this->asset->container()->handle(),
-            $this->sanitizePath($this->asset->path()),
-        );
-
-        return $baseUrl.$operations->join('/');
+        return $baseUrl.$this->buildImageBossPath('{width}', $height);
     }
 
     public function placeholder(): string
@@ -280,8 +242,10 @@ class ImageBossBuilder
             return [$this->width, $this->height];
         }
 
-        if ($this->width && $this->ratio) {
-            return [$this->width, $this->calculateHeight($this->width)];
+        if ($this->ratio) {
+            $width = $this->width ?? ($this->asset->width() ?: $this->max ?? $this->configuredWidth('default_width', 1000));
+
+            return [$width, $this->calculateHeight($width)];
         }
 
         $assetWidth = $this->asset->width();
@@ -294,7 +258,7 @@ class ImageBossBuilder
         return [null, null];
     }
 
-    private function buildImageBossPath(int $width, ?int $height): string
+    private function buildImageBossPath(int|string $width, int|string|null $height): string
     {
         $source = config('statamic.imageboss.source');
         $operations = collect(['', $source]);
@@ -315,20 +279,9 @@ class ImageBossBuilder
 
         $operations->push($options);
 
-        $operations->push(
-            $this->asset->container()->diskHandle() ?? $this->asset->container()->handle(),
-            $this->sanitizePath($this->asset->path()),
-        );
+        $operations->push(OriginPath::for($this->asset));
 
         return $operations->join('/');
-    }
-
-    private function sanitizePath(string $path): string
-    {
-        $path = str_replace(['\\', '..'], ['/', ''], $path);
-        $path = (string) preg_replace('#/+#', '/', $path);
-
-        return ltrim($path, '/');
     }
 
     private function signPath(string $path): string
@@ -356,24 +309,33 @@ class ImageBossBuilder
         return URL::makeAbsolute($manipulation->build());
     }
 
+    private function configuredWidth(string $key, int $default): int
+    {
+        $value = filter_var(config('statamic.imageboss.'.$key), FILTER_VALIDATE_INT);
+
+        return $value > 0 ? $value : $default;
+    }
+
     /**
      * @return array<int>
      */
     private function generateWidths(): array
     {
-        $min = $this->min ?? config('statamic.imageboss.presets.default.min', 320);
-        $max = $this->max ?? config('statamic.imageboss.presets.default.max', 2560);
-        $interval = $this->interval ?? config('statamic.imageboss.width_interval', 320);
+        $min = $this->min ?? $this->configuredWidth('presets.default.min', 320);
+        $max = $this->max ?? $this->configuredWidth('presets.default.max', 2560);
+        $interval = $this->interval ?? $this->configuredWidth('width_interval', 200);
+
+        if (intdiv($max - $min, $interval) >= 1024) {
+            throw new \InvalidArgumentException('Srcset exceeds 1024 width intervals; increase the interval or reduce the range.');
+        }
 
         $widths = [];
 
-        for ($w = $min; $w <= $max; $w += $interval) {
+        for ($w = $min; $w < $max; $w += $interval) {
             $widths[] = $w;
         }
 
-        if (end($widths) !== $max) {
-            $widths[] = $max;
-        }
+        $widths[] = $max;
 
         return $widths;
     }
@@ -413,8 +375,8 @@ class ImageBossBuilder
         }
 
         return [
-            'x' => round($focusX / 100, 1),
-            'y' => round($focusY / 100, 1),
+            'x' => round($focusX / 100, 4),
+            'y' => round($focusY / 100, 4),
         ];
     }
 

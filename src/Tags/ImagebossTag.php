@@ -2,8 +2,10 @@
 
 namespace Noo\StatamicImageboss\Tags;
 
+use Illuminate\Support\Collection;
 use Noo\StatamicImageboss\ImageBoss;
 use Statamic\Assets\Asset;
+use Statamic\Contracts\Assets\QueryBuilder;
 use Statamic\Fields\Value;
 use Statamic\Tags\Tags;
 
@@ -78,22 +80,18 @@ class ImagebossTag extends Tags
     {
         $src = $this->params->get('src');
 
-        if ($src instanceof Asset) {
-            return $src;
+        if (is_string($src) && $src !== '') {
+            $src = $this->context->get($src);
         }
 
-        $contextValue = $this->context->get($src);
-
-        if ($contextValue instanceof Asset) {
-            return $contextValue;
+        if ($src instanceof Value) {
+            $src = $src->value();
         }
 
-        if ($contextValue instanceof Value) {
-            $resolved = $contextValue->value();
-
-            return $resolved instanceof Asset ? $resolved : null;
+        if ($src instanceof Collection || $src instanceof QueryBuilder) {
+            $src = $src->first();
         }
 
-        return null;
+        return $src instanceof Asset ? $src : null;
     }
 }
